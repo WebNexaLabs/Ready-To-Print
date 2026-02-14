@@ -637,7 +637,7 @@ export default function Editor({ images, onCancel }) {
                     </div>
 
                     {/* Right: Photo Preview & Downloads */}
-                    <div style={{ flex: 1 }}>
+                    <div className="result-right" style={{ flex: 1 }}>
                         <div style={{
                             background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
                             overflow: 'hidden'
