@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
 import { removeBackground } from '@imgly/background-removal';
 import { documentTypes } from '../data/countries';
-import { generatePhotoSheet, PAGE_SIZES } from '../utils/photoGenerator';
+import { generatePhotoSheet, PAGE_SIZES, getMaxPhotosPerPage } from '../utils/photoGenerator';
 import { jsPDF } from 'jspdf';
 import {
     Download, ChevronLeft, ZoomIn, ZoomOut, Check, RotateCw, RotateCcw,
@@ -66,8 +66,11 @@ export default function Editor({ images, onCancel }) {
     const [processingStatus, setProcessingStatus] = useState('');
     const [activePageSize, setActivePageSize] = useState(PAGE_SIZES[0]);
     const [isRegenerating, setIsRegenerating] = useState(false);
-    const [aiEngine, setAiEngine] = useState('local');
-    const [removeBgApiKey, setRemoveBgApiKey] = useState(localStorage.getItem('removebg_api_key') || '');
+
+    // Array of integers, same length as images
+    const [printCounts, setPrintCounts] = useState([]);
+    const [maxSlots, setMaxSlots] = useState(0);
+
     const [autoAdjustStatus, setAutoAdjustStatus] = useState('');
 
     // ======= AUTO FACE DETECTION & ORIENTATION =======
@@ -220,18 +223,7 @@ export default function Editor({ images, onCancel }) {
             safeArea / 2 - img.height * 0.5
         );
 
-        // Apply brightness/contrast adjustments
-        const brightnessVal = 1 + brightness / 100;
-        const contrastVal = 1 + contrast / 100;
-
-        const adjustedCanvas = document.createElement('canvas');
-        adjustedCanvas.width = safeArea;
-        adjustedCanvas.height = safeArea;
-        const adjCtx = adjustedCanvas.getContext('2d');
-        adjCtx.filter = `brightness(${brightnessVal}) contrast(${contrastVal})`;
-        adjCtx.drawImage(canvas, 0, 0);
-
-        const data = adjCtx.getImageData(0, 0, safeArea, safeArea);
+        const data = ctx.getImageData(0, 0, safeArea, safeArea);
 
         canvas.width = pixelCrop.width;
         canvas.height = pixelCrop.height;
@@ -249,27 +241,9 @@ export default function Editor({ images, onCancel }) {
         });
     };
 
-    // Remove.bg API-based background removal
-    const removeBgApi = async (blob) => {
-        const formData = new FormData();
-        formData.append('image_file', blob);
-        formData.append('size', 'auto');
 
-        const res = await fetch('https://api.remove.bg/v1.0/removebg', {
-            method: 'POST',
-            headers: { 'X-Api-Key': removeBgApiKey },
-            body: formData
-        });
 
-        if (!res.ok) {
-            const errText = await res.text();
-            throw new Error(`Remove.bg API error: ${res.status} — ${errText}`);
-        }
-
-        return await res.blob();
-    };
-
-    const applyBgColor = async (blobUrl, color) => {
+    const applyBgColor = async (blobUrl, color, brightness = 0, contrast = 0) => {
         const img = await createImage(blobUrl);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -280,7 +254,30 @@ export default function Editor({ images, onCancel }) {
         ctx.fillStyle = color;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-        // Draw the transparent image on top
+        // Draw the transparent image on top with filters
+        const brightnessVal = 1 + brightness / 100;
+        const contrastVal = 1 + contrast / 100;
+        ctx.filter = `brightness(${brightnessVal}) contrast(${contrastVal})`;
+        ctx.drawImage(img, 0, 0);
+        ctx.filter = 'none';
+
+        return new Promise((resolve) => {
+            canvas.toBlob((file) => {
+                resolve(URL.createObjectURL(file));
+            }, 'image/jpeg', 0.95);
+        });
+    };
+
+    const applyFilters = async (blobUrl, brightness = 0, contrast = 0) => {
+        const img = await createImage(blobUrl);
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+
+        const brightnessVal = 1 + brightness / 100;
+        const contrastVal = 1 + contrast / 100;
+        ctx.filter = `brightness(${brightnessVal}) contrast(${contrastVal})`;
         ctx.drawImage(img, 0, 0);
 
         return new Promise((resolve) => {
@@ -309,27 +306,29 @@ export default function Editor({ images, onCancel }) {
                     cropPixels = { x: 0, y: 0, width: tempImg.naturalWidth, height: tempImg.naturalHeight };
                 }
 
+                // Get raw cropped image (no filters) for better AI detection
                 const croppedUrl = await getCroppedImg(imgData, cropPixels, imgSettings.rotation);
 
-                let finalSingle = croppedUrl;
+                let finalSingle;
 
                 if (bgRemoval) {
                     const response = await fetch(croppedUrl);
                     const blob = await response.blob();
 
                     let removedBgBlob;
-                    if (aiEngine === 'removebg') {
-                        if (!removeBgApiKey) throw new Error('Please enter your Remove.bg API key in the sidebar.');
-                        setProcessingStatus(`Removing background (photo ${i + 1}) via Remove.bg...`);
-                        removedBgBlob = await removeBgApi(blob);
-                    } else {
-                        setProcessingStatus(`Removing background (photo ${i + 1})...`);
-                        removedBgBlob = await removeBackground(blob, { output: { format: 'image/png' } });
-                    }
+
+                    setProcessingStatus(`Removing background (photo ${i + 1})...`);
+                    // Pass debug/quality flags if possible, but default is usually balanced.
+                    // processing on raw image improves edge detection significantly.
+                    removedBgBlob = await removeBackground(blob, { output: { format: 'image/png' } });
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
-                    setProcessingStatus(`Applying background color (photo ${i + 1})...`);
-                    finalSingle = await applyBgColor(transparentUrl, bgColor);
+                    setProcessingStatus(`Applying adjustments (photo ${i + 1})...`);
+                    // Apply filters to the subject ONLY, keeping BG pure white
+                    finalSingle = await applyBgColor(transparentUrl, bgColor, brightness, contrast);
+                } else {
+                    // No BG removal - apply filters to the whole cropped image
+                    finalSingle = await applyFilters(croppedUrl, brightness, contrast);
                 }
 
                 processedSingles.push(finalSingle);
@@ -342,6 +341,17 @@ export default function Editor({ images, onCancel }) {
             }
 
             setResult({ singles: processedSingles, sheets });
+
+            // Initialize print counts: distributed evenly or 1 each?
+            // Let's start with filling the first page efficiently
+            // Actually, user reference suggests customized counts. Let's start with 1 each.
+            const initialCounts = new Array(processedSingles.length).fill(1);
+            setPrintCounts(initialCounts);
+
+            // Calculate max slots for default page size
+            const max = getMaxPhotosPerPage(selectedDoc, PAGE_SIZES[0]);
+            setMaxSlots(max.max);
+
             setIsProcessing(false);
             setProcessingStatus('');
         } catch (e) {
@@ -361,15 +371,93 @@ export default function Editor({ images, onCancel }) {
         document.body.removeChild(link);
     };
 
-    const downloadPdf = (sheetDataUrl, pageSize) => {
-        const orientation = pageSize.widthInch > pageSize.heightInch ? 'landscape' : 'portrait';
+    const regenerateSheet = async (newCounts, pageSize = activePageSize) => {
+        if (!result) return;
+        setIsRegenerating(true);
+
+        const printList = [];
+        result.singles.forEach((img, i) => {
+            const count = newCounts[i] || 0;
+            for (let c = 0; c < count; c++) {
+                printList.push(img);
+            }
+        });
+
+        const newSheet = await generatePhotoSheet(printList, selectedDoc, pageSize);
+
+        setResult(prev => ({
+            ...prev,
+            sheets: {
+                ...prev.sheets,
+                [pageSize.id]: newSheet
+            }
+        }));
+        setIsRegenerating(false);
+    };
+
+    // Update max slots when page size changes
+    useEffect(() => {
+        if (selectedDoc && activePageSize) {
+            const max = getMaxPhotosPerPage(selectedDoc, activePageSize);
+            setMaxSlots(max.max);
+            // Optionally regenerate if needed, but not strictly required unless we want to AUTO-FIT
+        }
+    }, [activePageSize, selectedDoc]);
+
+    const handleCountChange = (index, delta) => {
+        const newCounts = [...printCounts];
+        const currentVal = newCounts[index];
+        const newVal = Math.max(0, currentVal + delta);
+
+        // Check if we exceed max slots? 
+        // Optional: Block increment if total >= maxSlots
+        const currentTotal = newCounts.reduce((a, b) => a + b, 0);
+        if (delta > 0 && currentTotal >= maxSlots) {
+            // alert? or just block
+            return;
+        }
+
+        newCounts[index] = newVal;
+        setPrintCounts(newCounts);
+
+        // Debounce or immediate? Immediate for responsiveness, but might lag.
+        // Let's try immediate.
+        regenerateSheet(newCounts);
+    };
+
+    const handleAutoFill = () => {
+        // Auto-fill remaining slots with the FIRST image (or currently "selected" concept if we had one)
+        // Or distribute evenly? 
+        // Strategy: Fill remainder with the first image for now, or the image with > 0 count.
+        const currentTotal = printCounts.reduce((a, b) => a + b, 0);
+        const remaining = maxSlots - currentTotal;
+
+        if (remaining > 0) {
+            const newCounts = [...printCounts];
+            // Add to the first image
+            newCounts[0] += remaining;
+            setPrintCounts(newCounts);
+            regenerateSheet(newCounts);
+        }
+    };
+
+    const handleClearAll = () => {
+        const newCounts = new Array(printCounts.length).fill(0);
+        setPrintCounts(newCounts);
+        regenerateSheet(newCounts);
+    };
+
+    const totalFilled = printCounts.reduce((a, b) => a + b, 0);
+
+    const downloadPdf = (sheetDataUrl, widthInch, heightInch, filename) => {
+        const orientation = widthInch > heightInch ? 'landscape' : 'portrait';
         const pdf = new jsPDF({
             orientation,
             unit: 'in',
-            format: [pageSize.widthInch, pageSize.heightInch]
+            format: [widthInch, heightInch]
         });
-        pdf.addImage(sheetDataUrl, 'JPEG', 0, 0, pageSize.widthInch, pageSize.heightInch);
-        pdf.save(`passport-sheet-${pageSize.id}-${selectedDoc.id}.pdf`);
+        pdf.addImage(sheetDataUrl, 'JPEG', 0, 0, widthInch, heightInch);
+        pdf.save(filename);
     };
 
     // ======= RESULT VIEW (Image 3) =======
@@ -382,7 +470,7 @@ export default function Editor({ images, onCancel }) {
                     padding: '0 24px', position: 'sticky', top: 0, zIndex: 50
                 }}>
                     <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={onCancel}>
                             <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                                 <Camera style={{ width: 16, height: 16 }} />
                             </div>
@@ -431,6 +519,64 @@ export default function Editor({ images, onCancel }) {
                 <div className="result-content">
                     {/* Left: AI Verification */}
                     <div className="result-left">
+                        {/* Print Quantity Selector */}
+                        <div style={{
+                            background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
+                            padding: 24, marginBottom: 20
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+                                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A' }}>Your Uploads</h3>
+                                <button onClick={() => {/* Add logic to go back to upload if needed */ }} style={{ fontSize: 13, color: '#2563EB', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Add More</button>
+                            </div>
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {result.singles.map((s, i) => (
+                                    <div key={i} style={{
+                                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                                        padding: 12, borderRadius: 12, border: '1px solid #F1F5F9', background: '#F8FAFC'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <img src={s} alt={`Img ${i}`} style={{ width: 40, height: 50, objectFit: 'cover', borderRadius: 6, border: '1px solid #E2E8F0' }} />
+                                            <span style={{ fontSize: 14, fontWeight: 600, color: '#334155' }}>Image {i + 1}</span>
+                                        </div>
+
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <button onClick={() => handleCountChange(i, -1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #E2E8F0', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>-</button>
+                                            <span style={{ fontSize: 14, fontWeight: 700, width: 20, textAlign: 'center' }}>{printCounts[i]}</span>
+                                            <button onClick={() => handleCountChange(i, 1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #E2E8F0', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>+</button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* Empty Slot Placeholder if needed */}
+
+                            <div style={{ marginTop: 20, padding: 16, background: '#EFF6FF', borderRadius: 12 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, fontWeight: 600, color: '#1E293B' }}>
+                                    <span>Total Slots Filled:</span>
+                                    <span>{totalFilled} / {maxSlots}</span>
+                                </div>
+                                <div style={{ width: '100%', height: 8, background: '#DBEAFE', borderRadius: 99 }}>
+                                    <div style={{
+                                        width: `${Math.min(100, (totalFilled / maxSlots) * 100)}%`,
+                                        height: '100%', background: '#2563EB', borderRadius: 99,
+                                        transition: 'width 0.3s ease'
+                                    }}></div>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+                                    <button onClick={handleAutoFill} style={{ flex: 1, padding: '8px', background: '#fff', border: '1px solid #DBEAFE', borderRadius: 8, color: '#2563EB', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                        <Sparkles style={{ width: 14, height: 14 }} /> Auto-fill
+                                    </button>
+                                    <button onClick={handleClearAll} style={{ flex: 1, padding: '8px', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, color: '#64748B', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                        <RefreshCw style={{ width: 14, height: 14 }} /> Clear All
+                                    </button>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {/* AI Verification (Existing) - Moved below or kept? Let's keep it below */}
                         <div style={{
                             background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
                             padding: 24, marginBottom: 20
@@ -509,7 +655,14 @@ export default function Editor({ images, onCancel }) {
                                     {PAGE_SIZES.map(ps => (
                                         <button
                                             key={ps.id}
-                                            onClick={() => setActivePageSize(ps)}
+                                            onClick={() => {
+                                                setActivePageSize(ps);
+                                                // When changing page size, we want to regenerate with current counts?
+                                                // Yes, logic inside regenerateSheet uses new pageSize if passed, or activePageSize.
+                                                // But state activePageSize updates async.
+                                                // Better to call regenerateSheet explicitly with the new PS.
+                                                regenerateSheet(printCounts, ps);
+                                            }}
                                             style={{
                                                 padding: '8px 16px', borderRadius: 10,
                                                 border: activePageSize.id === ps.id ? '2px solid #2563EB' : '1px solid #E2E8F0',
@@ -543,51 +696,68 @@ export default function Editor({ images, onCancel }) {
 
                             {/* Download Buttons */}
                             <div className="download-section" style={{ padding: 24 }}>
-                                <button
-                                    onClick={() => downloadImage(result.sheets[activePageSize.id], `passport-sheet-${activePageSize.id}`)}
-                                    style={{
-                                        width: '100%', background: '#2563EB', color: '#fff', border: 'none',
-                                        padding: '16px 24px', borderRadius: 12, fontWeight: 700, fontSize: 15,
-                                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                        boxShadow: '0 4px 14px rgba(37,99,235,0.3)', marginBottom: 12
-                                    }}
-                                >
-                                    <FileImage style={{ width: 18, height: 18 }} /> Download {activePageSize.label} Sheet (JPEG)
-                                </button>
-
-                                {/* PDF Download — for A4 */}
-                                {activePageSize.id === 'a4' && (
+                                {activePageSize.id !== 'a4' && (
                                     <button
-                                        onClick={() => downloadPdf(result.sheets[activePageSize.id], activePageSize)}
+                                        onClick={() => downloadPdf(result.sheets[activePageSize.id], activePageSize.widthInch, activePageSize.heightInch, `passport-sheet-${activePageSize.id}-${selectedDoc.id}.pdf`)}
                                         style={{
-                                            width: '100%', background: '#DC2626', color: '#fff', border: 'none',
+                                            width: '100%', background: '#2563EB', color: '#fff', border: 'none',
                                             padding: '16px 24px', borderRadius: 12, fontWeight: 700, fontSize: 15,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                            boxShadow: '0 4px 14px rgba(220,38,38,0.3)', marginBottom: 12
+                                            boxShadow: '0 4px 14px rgba(37,99,235,0.3)', marginBottom: 12
                                         }}
                                     >
-                                        <FileImage style={{ width: 18, height: 18 }} /> Download A4 PDF
+                                        <FileImage style={{ width: 18, height: 18 }} /> Download {activePageSize.label} Sheet (PDF)
                                     </button>
                                 )}
 
-                                <div style={{ display: 'flex', gap: 12 }}>
+                                {/* A4 Sheet Download - Always Visible */}
+                                <button
+                                    onClick={() => downloadPdf(result.sheets['a4'], 8.27, 11.69, `passport-sheet-a4-${selectedDoc.id}.pdf`)}
+                                    style={{
+                                        width: '100%', background: '#DC2626', color: '#fff', border: 'none',
+                                        padding: '16px 24px', borderRadius: 12, fontWeight: 700, fontSize: 15,
+                                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                        boxShadow: '0 4px 14px rgba(220,38,38,0.3)', marginBottom: 12
+                                    }}
+                                >
+                                    <FileImage style={{ width: 18, height: 18 }} /> Download A4 Sheet (PDF)
+                                </button>
+
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     <button
-                                        onClick={() => {
-                                            result.singles.forEach((s, i) => downloadImage(s, `passport-digital-${i + 1}`));
-                                        }}
+                                        onClick={() => result.singles.forEach((s, i) => downloadImage(s, `passport-digital-${i + 1}`))}
                                         style={{
-                                            flex: 1, background: '#fff', color: '#334155', border: '1px solid #E2E8F0',
-                                            padding: '14px 20px', borderRadius: 12, fontWeight: 600, fontSize: 14,
-                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+                                            flex: 1, minWidth: 100, background: '#fff', color: '#334155', border: '1px solid #E2E8F0',
+                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                            whiteSpace: 'nowrap'
                                         }}
                                     >
                                         <Download style={{ width: 16, height: 16 }} /> Digital JPEG
                                     </button>
+
+                                    <button
+                                        onClick={() => {
+                                            const w = selectedDoc.physicalUnit === 'in' ? selectedDoc.physicalWidth : selectedDoc.physicalWidth / 25.4;
+                                            const h = selectedDoc.physicalUnit === 'in' ? selectedDoc.physicalHeight : selectedDoc.physicalHeight / 25.4;
+                                            result.singles.forEach((s, i) => downloadPdf(s, w, h, `passport-digital-${i + 1}-${selectedDoc.id}.pdf`));
+                                        }}
+                                        style={{
+                                            flex: 1, minWidth: 100, background: '#fff', color: '#334155', border: '1px solid #E2E8F0',
+                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        <FileImage style={{ width: 16, height: 16 }} /> Digital PDF
+                                    </button>
+
                                     <button
                                         style={{
-                                            flex: 1, background: '#0F172A', color: '#fff', border: 'none',
-                                            padding: '14px 20px', borderRadius: 12, fontWeight: 600, fontSize: 14,
-                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8
+                                            flex: 1, minWidth: 130, background: '#0F172A', color: '#fff', border: 'none',
+                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                            whiteSpace: 'nowrap'
                                         }}
                                     >
                                         <Printer style={{ width: 16, height: 16 }} /> Order Prints (₹99)
@@ -606,7 +776,7 @@ export default function Editor({ images, onCancel }) {
                                         <Sparkles style={{ width: 14, height: 14 }} /> AI Optimized
                                     </span>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                        <Shield style={{ width: 14, height: 14 }} /> Auto-delete in 24h
+                                        <Shield style={{ width: 14, height: 14 }} /> Auto-delete after completing the task
                                     </span>
                                 </div>
                             </div>
@@ -663,7 +833,7 @@ export default function Editor({ images, onCancel }) {
                 padding: '0 24px', flexShrink: 0
             }}>
                 <div style={{ display: 'flex', height: 60, alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={onCancel}>
                         <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <Camera style={{ width: 16, height: 16 }} />
                         </div>
@@ -690,17 +860,45 @@ export default function Editor({ images, onCancel }) {
                 {/* Canvas Area */}
                 <div className="editor-canvas">
                     <div className="editor-toolbar" style={{
-                        position: 'absolute', top: 16, left: 24, zIndex: 10,
-                        background: '#fff', borderRadius: 12, padding: '8px 12px',
-                        display: 'flex', gap: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                        border: '1px solid #E2E8F0'
+                        position: 'absolute', top: '50%', right: 16, transform: 'translateY(-50%)', zIndex: 10,
+                        background: '#fff', borderRadius: 12, padding: '12px 8px',
+                        display: 'flex', flexDirection: 'column', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                        border: '1px solid #E2E8F0', alignItems: 'center'
                     }}>
+                        {/* Vertical Zoom Slider Group */}
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                            <button onClick={() => setZoom(z => Math.min(3, z + 0.2))} style={{
+                                width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none',
+                                color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}><ZoomIn style={{ width: 16, height: 16 }} /></button>
+
+                            <div style={{ height: 100, width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <input
+                                    type="range"
+                                    min={1}
+                                    max={3}
+                                    step={0.1}
+                                    value={zoom}
+                                    onChange={(e) => setZoom(Number(e.target.value))}
+                                    style={{
+                                        width: 100, height: 4, accentColor: '#2563EB', cursor: 'pointer',
+                                        transform: 'rotate(-90deg)', transformOrigin: 'center'
+                                    }}
+                                />
+                            </div>
+
+                            <button onClick={() => setZoom(z => Math.max(1, z - 0.2))} style={{
+                                width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none',
+                                color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}><ZoomOut style={{ width: 16, height: 16 }} /></button>
+                        </div>
+
+                        <div style={{ width: 24, height: 1, background: '#E2E8F0', margin: '4px 0' }}></div>
+
+                        {/* Rotation Buttons */}
                         {[
-                            { icon: <ZoomIn style={{ width: 18, height: 18 }} />, action: () => setZoom(z => Math.min(3, z + 0.2)) },
-                            { icon: <ZoomOut style={{ width: 18, height: 18 }} />, action: () => setZoom(z => Math.max(1, z - 0.2)) },
                             { icon: <RotateCcw style={{ width: 18, height: 18 }} />, action: () => setRotation(r => r - 90) },
                             { icon: <RotateCw style={{ width: 18, height: 18 }} />, action: () => setRotation(r => r + 90) },
-                            { icon: <FlipHorizontal style={{ width: 18, height: 18 }} />, action: () => { } },
                         ].map((btn, i) => (
                             <button key={i} onClick={btn.action} style={{
                                 width: 36, height: 36, borderRadius: 8, border: 'none',
@@ -935,61 +1133,7 @@ export default function Editor({ images, onCancel }) {
                             </div>
 
                             {/* AI Engine Selector */}
-                            {bgRemoval && (
-                                <div style={{
-                                    padding: 14, borderRadius: 12, border: '1px solid #E2E8F0', background: '#FAFAFA', marginBottom: 12,
-                                    animation: 'fadeIn 0.3s ease'
-                                }}>
-                                    <p style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 10 }}>AI Engine</p>
-                                    <div style={{ display: 'flex', gap: 8, marginBottom: aiEngine === 'removebg' ? 12 : 0 }}>
-                                        {[
-                                            { id: 'local', label: '🧠 Local AI', desc: 'Offline • Free' },
-                                            { id: 'removebg', label: '☁️ Remove.bg', desc: 'API • Faster' }
-                                        ].map(eng => (
-                                            <button
-                                                key={eng.id}
-                                                onClick={() => setAiEngine(eng.id)}
-                                                style={{
-                                                    flex: 1, padding: '10px 8px', borderRadius: 10,
-                                                    border: aiEngine === eng.id ? '2px solid #8B5CF6' : '1px solid #E2E8F0',
-                                                    background: aiEngine === eng.id ? '#F5F3FF' : '#fff',
-                                                    color: aiEngine === eng.id ? '#7C3AED' : '#64748B',
-                                                    fontSize: 12, fontWeight: 700, cursor: 'pointer',
-                                                    transition: 'all 0.2s', display: 'flex', flexDirection: 'column',
-                                                    alignItems: 'center', gap: 2
-                                                }}
-                                            >
-                                                <span>{eng.label}</span>
-                                                <span style={{ fontSize: 10, fontWeight: 500, opacity: 0.7 }}>{eng.desc}</span>
-                                            </button>
-                                        ))}
-                                    </div>
 
-                                    {/* Remove.bg API Key Input */}
-                                    {aiEngine === 'removebg' && (
-                                        <div>
-                                            <label style={{ fontSize: 11, fontWeight: 600, color: '#64748B', display: 'block', marginBottom: 4 }}>API Key (free at remove.bg)</label>
-                                            <input
-                                                type="password"
-                                                placeholder="Paste your Remove.bg API key"
-                                                value={removeBgApiKey}
-                                                onChange={e => {
-                                                    setRemoveBgApiKey(e.target.value);
-                                                    localStorage.setItem('removebg_api_key', e.target.value);
-                                                }}
-                                                style={{
-                                                    width: '100%', padding: '8px 12px', borderRadius: 8,
-                                                    border: '1px solid #E2E8F0', fontSize: 12, color: '#0F172A',
-                                                    outline: 'none', fontFamily: 'monospace'
-                                                }}
-                                            />
-                                            <p style={{ fontSize: 10, color: '#94A3B8', marginTop: 4 }}>
-                                                Get free key (50 images/mo): <a href="https://www.remove.bg/api" target="_blank" rel="noopener" style={{ color: '#7C3AED', textDecoration: 'underline' }}>remove.bg/api</a>
-                                            </p>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
 
                             {/* Background Color Picker */}
                             {bgRemoval && (

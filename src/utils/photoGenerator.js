@@ -82,10 +82,12 @@ export const generatePhotoSheet = async (imageSources, docType, pageSize = PAGE_
     let photoIdx = 0;
     for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
+            if (photoIdx >= loadedImages.length) break;
+
             const x = offsetX + col * (photoWidthPx + GAP);
             const y = offsetY + row * (photoHeightPx + GAP);
 
-            const img = loadedImages[photoIdx % loadedImages.length];
+            const img = loadedImages[photoIdx];
             ctx.drawImage(img, x, y, photoWidthPx, photoHeightPx);
 
             // Add black border around each photo
@@ -98,4 +100,49 @@ export const generatePhotoSheet = async (imageSources, docType, pageSize = PAGE_
     }
 
     return canvas.toDataURL('image/jpeg', 0.92);
+};
+
+export const getMaxPhotosPerPage = (docType, pageSize) => {
+    // Reuse logic to calculate max capacity
+    let basePhotoW, basePhotoH;
+
+    if (docType.physicalUnit === 'mm') {
+        basePhotoW = Math.round((docType.physicalWidth / 25.4) * 300);
+        basePhotoH = Math.round((docType.physicalHeight / 25.4) * 300);
+    } else if (docType.physicalUnit === 'in') {
+        basePhotoW = Math.round(docType.physicalWidth * 300);
+        basePhotoH = Math.round(docType.physicalHeight * 300);
+    } else {
+        basePhotoW = docType.width;
+        basePhotoH = docType.height;
+    }
+
+    const GAP = 16;
+    const MARGIN = 12;
+    const usableW = pageSize.widthPx - MARGIN * 2;
+    const usableH = pageSize.heightPx - MARGIN * 2;
+
+    let photoWidthPx = basePhotoW;
+    let photoHeightPx = basePhotoH;
+    let cols, rows;
+
+    if (photoWidthPx > usableW * 0.45) {
+        const scale = (usableW * 0.45) / photoWidthPx;
+        photoWidthPx = Math.round(photoWidthPx * scale);
+        photoHeightPx = Math.round(photoHeightPx * scale);
+    }
+
+    // Default min just to calculate max capacity (we want packing efficiency)
+    // We use the same loop as generation to match exactly
+    const MIN_PHOTOS = pageSize.minPhotos || 10;
+
+    for (let attempt = 0; attempt < 20; attempt++) {
+        cols = Math.floor((usableW + GAP) / (photoWidthPx + GAP));
+        rows = Math.floor((usableH + GAP) / (photoHeightPx + GAP));
+        if (cols * rows >= MIN_PHOTOS) break;
+        photoWidthPx = Math.round(photoWidthPx * 0.95);
+        photoHeightPx = Math.round(photoHeightPx * 0.95);
+    }
+
+    return { max: cols * rows, cols, rows, photoWidthPx, photoHeightPx };
 };
