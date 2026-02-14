@@ -613,3 +613,14 @@ input[type="range"]::-webkit-slider-thumb:hover {
     margin: 0 8px !important;
   }
 }
+
+/* ===== Login Page Styles ===== */
+@media (max-width: 900px) {
+  .login-left {
+    display: none !important;
+  }
+
+  .login-right {
+    padding: 24px !important;
+  }
+}

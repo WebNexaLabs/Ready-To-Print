@@ -19,7 +19,7 @@ const BG_PRESETS = [
     { label: 'Cream', color: '#FEF9C3' },
 ];
 
-export default function Editor({ images, onCancel }) {
+export default function Editor({ images, onCancel, onOrder }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentImage = images[currentIndex];
 
@@ -493,12 +493,19 @@ export default function Editor({ images, onCancel }) {
                 {/* Step Progress */}
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 0, padding: '32px 24px 24px', alignItems: 'center' }}>
                     {[
-                        { num: 1, label: 'Upload', done: true },
-                        { num: 2, label: 'Edit', done: true },
+                        { num: 1, label: 'Upload', done: true, action: onCancel },
+                        { num: 2, label: 'Edit', done: true, action: () => setResult(null) },
                         { num: 3, label: 'Download', active: true }
                     ].map((step, i) => (
                         <div key={i} style={{ display: 'flex', alignItems: 'center' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <div
+                                onClick={step.action}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: 8,
+                                    cursor: step.action ? 'pointer' : 'default',
+                                    opacity: step.action ? 1 : (step.active ? 1 : 0.8)
+                                }}
+                            >
                                 <div style={{
                                     width: 32, height: 32, borderRadius: '50%',
                                     background: step.active ? '#2563EB' : step.done ? '#DCFCE7' : '#E2E8F0',
@@ -710,19 +717,6 @@ export default function Editor({ images, onCancel }) {
                                     </button>
                                 )}
 
-                                {/* A4 Sheet Download - Always Visible */}
-                                <button
-                                    onClick={() => downloadPdf(result.sheets['a4'], 8.27, 11.69, `passport-sheet-a4-${selectedDoc.id}.pdf`)}
-                                    style={{
-                                        width: '100%', background: '#DC2626', color: '#fff', border: 'none',
-                                        padding: '16px 24px', borderRadius: 12, fontWeight: 700, fontSize: 15,
-                                        cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                        boxShadow: '0 4px 14px rgba(220,38,38,0.3)', marginBottom: 12
-                                    }}
-                                >
-                                    <FileImage style={{ width: 18, height: 18 }} /> Download A4 Sheet (PDF)
-                                </button>
-
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     <button
                                         onClick={() => result.singles.forEach((s, i) => downloadImage(s, `passport-digital-${i + 1}`))}
@@ -753,6 +747,10 @@ export default function Editor({ images, onCancel }) {
                                     </button>
 
                                     <button
+                                        onClick={() => {
+                                            // Capture current sheet as image and pass to order page
+                                            if (onOrder) onOrder(result.sheets[activePageSize.id], activePageSize.label);
+                                        }}
                                         style={{
                                             flex: 1, minWidth: 130, background: '#0F172A', color: '#fff', border: 'none',
                                             padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
@@ -760,7 +758,7 @@ export default function Editor({ images, onCancel }) {
                                             whiteSpace: 'nowrap'
                                         }}
                                     >
-                                        <Printer style={{ width: 16, height: 16 }} /> Order Prints (₹99)
+                                        <Printer style={{ width: 16, height: 16 }} /> Order Prints (₹{activePageSize.id === '4x6' ? 64 : 99})
                                     </button>
                                 </div>
 

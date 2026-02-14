@@ -2,17 +2,36 @@ import { useState } from 'react';
 import { ShieldCheck, Scissors, ArrowRight, Camera, Printer, FileText, CheckCircle } from 'lucide-react';
 import Editor from './components/Editor';
 import UploadSection from './components/UploadSection';
+import Login from './components/Login';
+import OrderPrints from './components/OrderPrints';
 import { documentTypes } from './data/countries';
 
 function App() {
   const [images, setImages] = useState([]);
+  const [view, setView] = useState('home'); // 'home', 'login', 'order'
+  const [orderImage, setOrderImage] = useState(null);
+  const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
 
   const handleUpload = (imageDataUrls) => {
     setImages(imageDataUrls);
   };
 
+  const handleOrder = (img, label) => {
+    setOrderImage(img);
+    setOrderSheetLabel(label);
+    setView('order');
+  };
+
+  if (view === 'login') {
+    return <Login onBack={() => setView('home')} />;
+  }
+
+  if (view === 'order' && orderImage) {
+    return <OrderPrints image={orderImage} sheetLabel={orderSheetLabel} onBack={() => setView('home')} />;
+  }
+
   if (images.length > 0) {
-    return <Editor images={images} onCancel={() => setImages([])} />;
+    return <Editor images={images} onCancel={() => setImages([])} onOrder={handleOrder} />;
   }
 
   return (
@@ -43,13 +62,13 @@ function App() {
           </nav>
 
           <div className="header-actions">
-            <button className="login-btn" style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: '#475569', cursor: 'pointer' }}>Login</button>
-            <button style={{
-              background: '#2563EB', color: '#fff', border: 'none',
-              padding: '10px 24px', borderRadius: 999, fontWeight: 600, fontSize: 14,
-              cursor: 'pointer', boxShadow: '0 4px 14px rgba(37,99,235,0.25)',
-              transition: 'all 0.2s'
-            }}>Create Photo</button>
+            <button
+              className="login-btn"
+              onClick={() => setView('login')}
+              style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: '#475569', cursor: 'pointer' }}
+            >
+              Login
+            </button>
           </div>
         </div>
       </header>
