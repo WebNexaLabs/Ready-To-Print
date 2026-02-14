@@ -428,9 +428,9 @@ export default function Editor({ images, onCancel }) {
                 </div>
 
                 {/* Main Content */}
-                <div style={{ maxWidth: 1100, margin: '0 auto', padding: '0 24px 60px', display: 'flex', gap: 28, alignItems: 'flex-start' }}>
+                <div className="result-content">
                     {/* Left: AI Verification */}
-                    <div style={{ width: 300, flexShrink: 0 }}>
+                    <div className="result-left">
                         <div style={{
                             background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
                             padding: 24, marginBottom: 20
@@ -496,7 +496,7 @@ export default function Editor({ images, onCancel }) {
                             background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
                             overflow: 'hidden'
                         }}>
-                            <div style={{ padding: '20px 24px', borderBottom: '1px solid #F1F5F9' }}>
+                            <div className="result-header" style={{ padding: '20px 24px', borderBottom: '1px solid #F1F5F9' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                                     <div>
                                         <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>Your Passport Photos are Ready</h3>
@@ -505,7 +505,7 @@ export default function Editor({ images, onCancel }) {
                                 </div>
 
                                 {/* Page Size Tabs */}
-                                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                <div className="page-size-tabs" style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                                     {PAGE_SIZES.map(ps => (
                                         <button
                                             key={ps.id}
@@ -542,7 +542,7 @@ export default function Editor({ images, onCancel }) {
                             </div>
 
                             {/* Download Buttons */}
-                            <div style={{ padding: 24 }}>
+                            <div className="download-section" style={{ padding: 24 }}>
                                 <button
                                     onClick={() => downloadImage(result.sheets[activePageSize.id], `passport-sheet-${activePageSize.id}`)}
                                     style={{
@@ -686,11 +686,10 @@ export default function Editor({ images, onCancel }) {
             </header>
 
             {/* Editor Body */}
-            <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
+            <div className="editor-body">
                 {/* Canvas Area */}
-                <div style={{ flex: 1, background: '#F8FAFC', display: 'flex', flexDirection: 'column', position: 'relative' }}>
-                    {/* Toolbar */}
-                    <div style={{
+                <div className="editor-canvas">
+                    <div className="editor-toolbar" style={{
                         position: 'absolute', top: 16, left: 24, zIndex: 10,
                         background: '#fff', borderRadius: 12, padding: '8px 12px',
                         display: 'flex', gap: 4, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -737,7 +736,7 @@ export default function Editor({ images, onCancel }) {
 
                     {/* Photo Navigation Strip (for multiple photos) */}
                     {images.length > 1 && (
-                        <div style={{
+                        <div className="photo-nav-strip" style={{
                             position: 'absolute', top: 16, right: 24, zIndex: 10,
                             background: '#fff', borderRadius: 12, padding: '6px 8px',
                             display: 'flex', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
@@ -838,10 +837,7 @@ export default function Editor({ images, onCancel }) {
                 </div>
 
                 {/* Sidebar */}
-                <div style={{
-                    width: 360, background: '#fff', borderLeft: '1px solid #E2E8F0',
-                    display: 'flex', flexDirection: 'column', overflow: 'hidden'
-                }}>
+                <div className="editor-sidebar">
                     <div style={{ flex: 1, overflowY: 'auto', padding: 24 }}>
                         {/* Document Type Selection */}
                         <div style={{ marginBottom: 28 }}>
