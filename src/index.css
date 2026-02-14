@@ -493,3 +493,123 @@ input[type="range"]::-webkit-slider-thumb:hover {
     padding: 16px !important;
   }
 }
+
+/* ===== Editor Toolbar Styles ===== */
+.editor-toolbar {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  z-index: 10;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border: 1px solid #E2E8F0;
+  align-items: center;
+}
+
+.zoom-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoom-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-slider-container {
+  height: 100px;
+  width: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.zoom-slider {
+  width: 100px;
+  height: 4px;
+  accent-color: #2563EB;
+  cursor: pointer;
+  transform: rotate(-90deg);
+  transform-origin: center;
+}
+
+.toolbar-divider {
+  width: 24px;
+  height: 1px;
+  background: #E2E8F0;
+  margin: 4px 0;
+}
+
+.rotate-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: none;
+  background: none;
+  color: #475569;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+}
+
+.rotate-btn:hover {
+  background: #F1F5F9;
+}
+
+/* Mobile Toolbar Overrides */
+@media (max-width: 640px) {
+  .editor-toolbar {
+    top: auto !important;
+    bottom: 16px !important;
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%) !important;
+    flex-direction: row !important;
+    padding: 8px 16px !important;
+    width: 90%;
+    max-width: 360px;
+    justify-content: space-between;
+  }
+
+  .zoom-group {
+    flex-direction: row !important;
+    flex: 1;
+    justify-content: center;
+  }
+
+  .zoom-slider-container {
+    height: auto !important;
+    width: auto !important;
+    flex: 1;
+    margin: 0 8px;
+  }
+
+  .zoom-slider {
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  .toolbar-divider {
+    width: 1px !important;
+    height: 24px !important;
+    margin: 0 8px !important;
+  }
+}

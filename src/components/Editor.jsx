@@ -859,20 +859,12 @@ export default function Editor({ images, onCancel }) {
             <div className="editor-body">
                 {/* Canvas Area */}
                 <div className="editor-canvas">
-                    <div className="editor-toolbar" style={{
-                        position: 'absolute', top: '50%', right: 16, transform: 'translateY(-50%)', zIndex: 10,
-                        background: '#fff', borderRadius: 12, padding: '12px 8px',
-                        display: 'flex', flexDirection: 'column', gap: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                        border: '1px solid #E2E8F0', alignItems: 'center'
-                    }}>
+                    <div className="editor-toolbar">
                         {/* Vertical Zoom Slider Group */}
-                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-                            <button onClick={() => setZoom(z => Math.min(3, z + 0.2))} style={{
-                                width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none',
-                                color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}><ZoomIn style={{ width: 16, height: 16 }} /></button>
+                        <div className="zoom-group">
+                            <button onClick={() => setZoom(z => Math.min(3, z + 0.2))} className="zoom-btn"><ZoomIn style={{ width: 16, height: 16 }} /></button>
 
-                            <div style={{ height: 100, width: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div className="zoom-slider-container">
                                 <input
                                     type="range"
                                     min={1}
@@ -880,35 +872,21 @@ export default function Editor({ images, onCancel }) {
                                     step={0.1}
                                     value={zoom}
                                     onChange={(e) => setZoom(Number(e.target.value))}
-                                    style={{
-                                        width: 100, height: 4, accentColor: '#2563EB', cursor: 'pointer',
-                                        transform: 'rotate(-90deg)', transformOrigin: 'center'
-                                    }}
+                                    className="zoom-slider"
                                 />
                             </div>
 
-                            <button onClick={() => setZoom(z => Math.max(1, z - 0.2))} style={{
-                                width: 32, height: 32, borderRadius: 8, border: 'none', background: 'none',
-                                color: '#475569', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-                            }}><ZoomOut style={{ width: 16, height: 16 }} /></button>
+                            <button onClick={() => setZoom(z => Math.max(1, z - 0.2))} className="zoom-btn"><ZoomOut style={{ width: 16, height: 16 }} /></button>
                         </div>
 
-                        <div style={{ width: 24, height: 1, background: '#E2E8F0', margin: '4px 0' }}></div>
+                        <div className="toolbar-divider"></div>
 
                         {/* Rotation Buttons */}
                         {[
                             { icon: <RotateCcw style={{ width: 18, height: 18 }} />, action: () => setRotation(r => r - 90) },
                             { icon: <RotateCw style={{ width: 18, height: 18 }} />, action: () => setRotation(r => r + 90) },
                         ].map((btn, i) => (
-                            <button key={i} onClick={btn.action} style={{
-                                width: 36, height: 36, borderRadius: 8, border: 'none',
-                                background: 'none', color: '#475569', cursor: 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                transition: 'background 0.15s'
-                            }}
-                                onMouseEnter={e => e.currentTarget.style.background = '#F1F5F9'}
-                                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-                            >{btn.icon}</button>
+                            <button key={i} onClick={btn.action} className="rotate-btn">{btn.icon}</button>
                         ))}
                     </div>
 
