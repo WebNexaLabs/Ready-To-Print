@@ -3,12 +3,13 @@ import { ShieldCheck, Scissors, ArrowRight, Camera, Printer, FileText, CheckCirc
 import Editor from './components/Editor';
 import UploadSection from './components/UploadSection';
 import Login from './components/Login';
+import Pricing from './components/Pricing';
 import OrderPrints from './components/OrderPrints';
 import { documentTypes } from './data/countries';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [view, setView] = useState('home'); // 'home', 'login', 'order'
+  const [view, setView] = useState('home'); // 'home', 'login', 'order', 'pricing'
   const [orderImage, setOrderImage] = useState(null);
   const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
 
@@ -24,6 +25,41 @@ function App() {
 
   if (view === 'login') {
     return <Login onBack={() => setView('home')} />;
+  }
+
+  if (view === 'pricing') {
+    return (
+      <>
+        {/* Simple Header for navigation back */}
+        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
+              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                <Camera style={{ width: 16, height: 16 }} />
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
+              </span>
+            </div>
+            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Pricing</a>
+              <a href="#" style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
+              <a href="#" style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
+            </nav>
+            <div className="header-actions">
+              <button
+                onClick={() => setView('login')}
+                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+        <Pricing onOrder={() => setView('home')} />
+      </>
+    );
   }
 
   if (view === 'order' && orderImage) {
@@ -55,6 +91,15 @@ function App() {
           <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B' }}>
             {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
               <a key={item} href="#" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
+                onClick={(e) => {
+                  if (item === 'Pricing') {
+                    e.preventDefault();
+                    setView('pricing');
+                  } else if (item === 'Home') {
+                    e.preventDefault();
+                    setView('home');
+                  }
+                }}
                 onMouseEnter={e => e.target.style.color = '#2563EB'}
                 onMouseLeave={e => e.target.style.color = '#64748B'}
               >{item}</a>
@@ -78,15 +123,7 @@ function App() {
         <div className="hero-section">
           {/* Left */}
           <div style={{ flex: 1, maxWidth: 560 }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 8,
-              background: '#EFF6FF', borderRadius: 999, padding: '6px 16px',
-              fontSize: 12, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase',
-              letterSpacing: '0.05em', marginBottom: 24
-            }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563EB' }}></span>
-              Tailored for Indian Government Standards
-            </div>
+
 
             <h1 style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1, color: '#0F172A', marginBottom: 20, letterSpacing: '-0.03em' }}>
               Perfect Passport<br />Photos <span style={{ color: '#2563EB' }}>in 30s.</span>
@@ -323,11 +360,13 @@ function App() {
                     cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
                   }}
                 >Upload Your Photo</button>
-                <button style={{
-                  background: 'rgba(255,255,255,0.15)', color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  padding: '14px 32px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer'
-                }}>See Pricing</button>
+                <button
+                  onClick={() => setView('pricing')}
+                  style={{
+                    background: 'rgba(255,255,255,0.15)', color: '#fff',
+                    border: '1px solid rgba(255,255,255,0.3)',
+                    padding: '14px 32px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer'
+                  }}>See Pricing</button>
               </div>
             </div>
           </div>
@@ -386,7 +425,7 @@ function App() {
             borderTop: '1px solid #E2E8F0', paddingTop: 20,
             fontSize: 12, color: '#94A3B8'
           }}>
-            <p>© 2024 SelfieSePassport. Tailored for Indian Government Standards. Professional document photo services.</p>
+            <p>©2026 SelfieSePassport. Professional document photo services.</p>
             <div style={{ display: 'flex', gap: 16 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#22C55E' }}></span> SSL Encrypted
