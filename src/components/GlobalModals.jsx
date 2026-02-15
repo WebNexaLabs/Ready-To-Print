@@ -20,7 +20,7 @@ const GlobalModals = ({
                     <div style={{
                         background: '#fff', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
                         position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxHeight: '90vh', overflowY: 'auto'
-                    }} onClick={e => e.stopPropagation()}>
+                    }} onClick={e => e.stopPropagation()} className="modal-content">
                         <button
                             onClick={() => setShowPrivacy(false)}
                             style={{
@@ -77,7 +77,7 @@ const GlobalModals = ({
                     <div style={{
                         background: '#fff', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
                         position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxHeight: '90vh', overflowY: 'auto'
-                    }} onClick={e => e.stopPropagation()}>
+                    }} onClick={e => e.stopPropagation()} className="modal-content">
                         <button
                             onClick={() => setShowRefund(false)}
                             style={{
@@ -157,7 +157,7 @@ const GlobalModals = ({
                         background: '#fff', borderRadius: 24, padding: 40, maxWidth: 500, width: '100%',
                         position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
                         textAlign: 'center'
-                    }} onClick={e => e.stopPropagation()}>
+                    }} onClick={e => e.stopPropagation()} className="modal-content">
                         <button
                             onClick={() => setShowSupport(false)}
                             style={{
@@ -373,6 +373,11 @@ const GlobalModals = ({
                             }
                             .subscription-modal-content::-webkit-scrollbar-thumb:hover {
                                 background-color: #94A3B8;
+                            }
+                            @media (max-width: 640px) {
+                                .modal-content {
+                                    padding: 24px !important;
+                                }
                             }
                             @media (max-width: 900px) {
                                 .subscription-modal-content {

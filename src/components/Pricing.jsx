@@ -219,31 +219,32 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
             <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
                 <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', textAlign: 'center', marginBottom: 40 }}>Compare Plans</h2>
 
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0', overflow: 'hidden' }}>
-
-                    {/* Header Row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
-                        <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Features</div>
-                        <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Standard (4x6)</div>
-                        <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#CA8A04', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Professional (A4)</div>
-                        <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unlimited Digital</div>
-                    </div>
-
-                    {/* Rows */}
-                    {[
-                        { label: 'Sheet Format', standard: '4x6" Physical', prof: 'A4 Physical', unlim: 'Digital (Print Ready)', colorUnlim: '#475569' },
-                        { label: 'Max Photo Capacity', standard: '12 Photos', prof: '42 Photos', boldProf: true, unlim: 'Unlimited', colorUnlim: '#7C3AED', boldUnlim: true },
-                        { label: 'Validity', standard: 'One-time', prof: 'One-time', unlim: '3 Months', boldUnlim: true },
-                        { label: 'Delivery Method', standard: '3-5 Days', prof: 'Express Delivery', colorProf: '#16A34A', unlim: 'Instant Access', colorUnlim: '#7C3AED', boldUnlim: true },
-                        { label: 'Support Priority', standard: 'Regular', prof: 'Priority Support', unlim: 'VIP Priority', boldUnlim: true }
-                    ].map((row, i) => (
-                        <div key={i} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: i === 4 ? 'none' : '1px solid #F1F5F9' }}>
-                            <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: 500, color: '#334155' }}>{row.label}</div>
-                            <div style={{ padding: '20px 24px', fontSize: 14, color: '#475569' }}>{row.standard}</div>
-                            <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldProf ? 700 : 400, color: row.colorProf || '#0F172A' }}>{row.prof}</div>
-                            <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldUnlim ? 700 : 400, color: row.colorUnlim || '#0F172A' }}>{row.unlim}</div>
+                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0', overflowX: 'auto' }}>
+                    <div style={{ minWidth: 600 }}>
+                        {/* Header Row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
+                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Features</div>
+                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Standard (4x6)</div>
+                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#CA8A04', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Professional (A4)</div>
+                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unlimited Digital</div>
                         </div>
-                    ))}
+
+                        {/* Rows */}
+                        {[
+                            { label: 'Sheet Format', standard: '4x6" Physical', prof: 'A4 Physical', unlim: 'Digital (Print Ready)', colorUnlim: '#475569' },
+                            { label: 'Max Photo Capacity', standard: '12 Photos', prof: '42 Photos', boldProf: true, unlim: 'Unlimited', colorUnlim: '#7C3AED', boldUnlim: true },
+                            { label: 'Validity', standard: 'One-time', prof: 'One-time', unlim: '3 Months', boldUnlim: true },
+                            { label: 'Delivery Method', standard: '3-5 Days', prof: 'Express Delivery', colorProf: '#16A34A', unlim: 'Instant Access', colorUnlim: '#7C3AED', boldUnlim: true },
+                            { label: 'Support Priority', standard: 'Regular', prof: 'Priority Support', unlim: 'VIP Priority', boldUnlim: true }
+                        ].map((row, i) => (
+                            <div key={i} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: i === 4 ? 'none' : '1px solid #F1F5F9' }}>
+                                <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: 500, color: '#334155' }}>{row.label}</div>
+                                <div style={{ padding: '20px 24px', fontSize: 14, color: '#475569' }}>{row.standard}</div>
+                                <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldProf ? 700 : 400, color: row.colorProf || '#0F172A' }}>{row.prof}</div>
+                                <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldUnlim ? 700 : 400, color: row.colorUnlim || '#0F172A' }}>{row.unlim}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 
@@ -283,6 +284,30 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     ©2026 SelfieSePassport. Professional document photo services.
                 </div>
             </footer>
+
+            <style>{`
+                @media (max-width: 768px) {
+                    h1 {
+                        font-size: 28px !important;
+                    }
+                    div[style*="padding: 60px 24px 40px"] {
+                        padding: 40px 20px 24px !important;
+                    }
+                    div[style*="grid-template-columns"] {
+                        grid-template-columns: 1fr !important;
+                        gap: 16px !important;
+                    }
+                    footer div[style*="justify-content: space-between"] {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 24px;
+                    }
+                    footer div[style*="display: flex; gap: 24px"] {
+                        flex-direction: column;
+                        gap: 12px;
+                    }
+                }
+            `}</style>
 
             {/* Scroll to Top Button */}
             {showScrollTop && (

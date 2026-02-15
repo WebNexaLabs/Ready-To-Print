@@ -10,6 +10,8 @@ import OrderPrints from './components/OrderPrints';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import GlobalModals from './components/GlobalModals';
+
+import Header from './components/Header';
 import { documentTypes } from './data/countries';
 
 function App() {
@@ -43,33 +45,8 @@ function App() {
   if (view === 'pricing') {
     return (
       <>
-        {/* Simple Header for navigation back */}
-        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
-              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                <Camera style={{ width: 16, height: 16 }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
-              </span>
-            </div>
-            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Pricing</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
-            </nav>
-            <div className="header-actions">
-              <button
-                onClick={() => setView('login')}
-                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
+
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
         <Pricing
           onOrder={() => setView('home')}
           onNavigate={(page) => {
@@ -92,32 +69,8 @@ function App() {
   if (view === 'guidelines') {
     return (
       <>
-        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
-              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                <Camera style={{ width: 16, height: 16 }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
-              </span>
-            </div>
-            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Pricing</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Photo Guidelines</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
-            </nav>
-            <div className="header-actions">
-              <button
-                onClick={() => setView('login')}
-                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
+
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
         <PhotoGuidelines />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
@@ -131,32 +84,8 @@ function App() {
   if (view === 'privacy') {
     return (
       <>
-        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
-              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                <Camera style={{ width: 16, height: 16 }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
-              </span>
-            </div>
-            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Pricing</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
-            </nav>
-            <div className="header-actions">
-              <button
-                onClick={() => setView('login')}
-                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
+
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
         <PrivacyPolicy />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
@@ -170,32 +99,8 @@ function App() {
   if (view === 'terms') {
     return (
       <>
-        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
-          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
-              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                <Camera style={{ width: 16, height: 16 }} />
-              </div>
-              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
-                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
-              </span>
-            </div>
-            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Pricing</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
-              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
-            </nav>
-            <div className="header-actions">
-              <button
-                onClick={() => setView('login')}
-                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
-              >
-                Login
-              </button>
-            </div>
-          </div>
-        </div>
+
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
         <TermsOfService />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
@@ -235,56 +140,7 @@ function App() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Header */}
-      <header style={{
-        position: 'sticky', top: 0, zIndex: 50,
-        background: '#fff', borderBottom: '1px solid #F1F5F9',
-        padding: '0 24px'
-      }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 72, alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer' }} onClick={() => setImages([])}>
-            <div style={{ width: 36, height: 36, background: '#2563EB', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-              <Camera style={{ width: 20, height: 20 }} />
-            </div>
-            <span style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
-              SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
-            </span>
-          </div>
-
-          <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B' }}>
-            {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
-              <a key={item} href="#" style={{ color: 'inherit', textDecoration: 'none', transition: 'color 0.2s' }}
-                onClick={(e) => {
-                  if (item === 'Pricing') {
-                    e.preventDefault();
-                    setView('pricing');
-                  } else if (item === 'Home') {
-                    e.preventDefault();
-                    setView('home');
-                  } else if (item === 'Photo Guidelines') {
-                    e.preventDefault();
-                    setView('guidelines');
-                  } else if (item === 'Support') {
-                    e.preventDefault();
-                    setShowSupport(true);
-                  }
-                }}
-                onMouseEnter={e => e.target.style.color = '#2563EB'}
-                onMouseLeave={e => e.target.style.color = '#64748B'}
-              >{item}</a>
-            ))}
-          </nav>
-
-          <div className="header-actions">
-            <button
-              className="login-btn"
-              onClick={() => setView('login')}
-              style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: '#475569', cursor: 'pointer' }}
-            >
-              Login
-            </button>
-          </div>
-        </div>
-      </header>
+      <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
 
       {/* Hero Section */}
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 24px 40px' }}>
