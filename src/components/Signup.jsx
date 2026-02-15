@@ -123,8 +123,21 @@ const Signup = ({ onLogin, onBack }) => {
                 maxWidth: 720
             }}>
                 <div style={{ maxWidth: 480, margin: '0 auto', width: '100%' }}>
+                    {/* Mobile Back Button */}
+                    <button
+                        className="signup-mobile-back"
+                        onClick={onBack}
+                        style={{
+                            display: 'none', background: 'none', border: 'none',
+                            fontSize: 14, fontWeight: 600, color: '#1E40AF', cursor: 'pointer',
+                            padding: 0, marginBottom: 24, alignItems: 'center', gap: 6
+                        }}
+                    >
+                        <ArrowLeft style={{ width: 16, height: 16 }} /> Back to Home
+                    </button>
+
                     <h2 style={{ fontSize: 32, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Create your Account</h2>
-                    <p style={{ color: '#64748B', marginBottom: 40, lineHeight: 1.6 }}>
+                    <p style={{ color: '#64748B', marginBottom: 32, lineHeight: 1.6, fontSize: 14 }}>
                         Join SelfieSePassport today and simplify your document processing.
                     </p>
 
@@ -270,7 +283,7 @@ const Signup = ({ onLogin, onBack }) => {
                         Already have an account? <button onClick={onLogin} style={{ background: 'none', border: 'none', fontWeight: 600, color: '#1E40AF', cursor: 'pointer', padding: 0 }}>Login</button>
                     </div>
 
-                    <div style={{ marginTop: 48, display: 'flex', justifyContent: 'center', gap: 20, fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    <div className="signup-trust-badges" style={{ marginTop: 48, display: 'flex', justifyContent: 'center', gap: 20, fontSize: 10, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <div style={{ width: 12, height: 12, background: '#64748B', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 8 }}>L</div>
                             SECURE ENCRYPTION
@@ -280,6 +293,15 @@ const Signup = ({ onLogin, onBack }) => {
                             ISO CERTIFIED
                         </div>
                     </div>
+
+                    {/* Mobile responsive styles */}
+                    <style>{`
+                        @media (max-width: 900px) {
+                            .signup-mobile-back {
+                                display: flex !important;
+                            }
+                        }
+                    `}</style>
                 </div>
             </div>
         </div>

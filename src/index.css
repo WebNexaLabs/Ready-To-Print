@@ -644,4 +644,28 @@ input.zoom-slider::-webkit-slider-thumb:hover {
   .login-right {
     padding: 24px !important;
   }
+
+  .signup-left {
+    display: none !important;
+  }
+
+  .signup-right {
+    padding: 32px 20px !important;
+    max-width: 100% !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .signup-right {
+    padding: 24px 16px !important;
+  }
+
+  .signup-right h2 {
+    font-size: 24px !important;
+  }
+
+  .signup-right .signup-trust-badges {
+    gap: 12px !important;
+    margin-top: 32px !important;
+  }
 }
