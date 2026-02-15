@@ -54,7 +54,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
     return (
         <div style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Inter', sans-serif", paddingBottom: 80 }}>
             {/* Header */}
-            <div style={{ background: '#EFF6FF', padding: '60px 24px 40px', textAlign: 'center' }}>
+            <div className="pricing-header" style={{ background: '#EFF6FF', padding: '60px 24px 40px', textAlign: 'center' }}>
                 <div style={{ maxWidth: 800, margin: '0 auto' }}>
                     <h1 style={{ fontSize: 36, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
                         Professional Prints, <span style={{ color: '#2563EB' }}>Delivered to Your Doorstep</span>
@@ -66,7 +66,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
             </div>
 
             {/* Pricing Cards */}
-            <div style={{ maxWidth: 1000, margin: '-20px auto 60px', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
+            <div className="pricing-cards-grid" style={{ maxWidth: 1000, margin: '-20px auto 60px', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
 
                 {/* Standard Plan */}
                 <div style={{ background: '#fff', borderRadius: 24, padding: 32, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column' }}>
@@ -249,7 +249,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
             </div>
 
             {/* Features Icons */}
-            <div style={{ maxWidth: 1000, margin: '80px auto 0', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, textAlign: 'center' }}>
+            <div className="features-icon-grid" style={{ maxWidth: 1000, margin: '80px auto 0', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 40, textAlign: 'center' }}>
                 {[
                     { icon: Truck, title: 'Secure Delivery', desc: 'Insured & Trackable' },
                     { icon: ShieldCheck, title: 'Official Standards', desc: 'Guaranteed Acceptance' }, // Changed Shield to ShieldCheck
@@ -290,10 +290,11 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     h1 {
                         font-size: 28px !important;
                     }
-                    div[style*="padding: 60px 24px 40px"] {
+                    .pricing-header {
                         padding: 40px 20px 24px !important;
                     }
-                    div[style*="grid-template-columns"] {
+                    .pricing-cards-grid,
+                    .features-icon-grid {
                         grid-template-columns: 1fr !important;
                         gap: 16px !important;
                     }
