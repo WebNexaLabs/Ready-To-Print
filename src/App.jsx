@@ -9,6 +9,7 @@ import PhotoGuidelines from './components/PhotoGuidelines';
 import OrderPrints from './components/OrderPrints';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
+import GlobalModals from './components/GlobalModals';
 import { documentTypes } from './data/countries';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showRefund, setShowRefund] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
+  const [showSubscription, setShowSubscription] = useState(false);
   const [orderImage, setOrderImage] = useState(null);
   const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
 
@@ -55,7 +57,7 @@ function App() {
             <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
               <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
               <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Pricing</a>
-              <a href="#" style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
               <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
             </nav>
             <div className="header-actions">
@@ -75,6 +77,13 @@ function App() {
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
           onSupport={() => setShowSupport(true)}
+          onUpgrade={() => setShowSubscription(true)}
+        />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+          showSubscription={showSubscription} setShowSubscription={setShowSubscription}
         />
       </>
     );
@@ -110,6 +119,11 @@ function App() {
           </div>
         </div>
         <PhotoGuidelines />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+        />
       </>
     );
   }
@@ -144,6 +158,11 @@ function App() {
           </div>
         </div>
         <PrivacyPolicy />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+        />
       </>
     );
   }
@@ -178,16 +197,39 @@ function App() {
           </div>
         </div>
         <TermsOfService />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+        />
       </>
     );
   }
 
   if (view === 'order' && orderImage) {
-    return <OrderPrints image={orderImage} sheetLabel={orderSheetLabel} onBack={() => setView('home')} />;
+    return (
+      <>
+        <OrderPrints image={orderImage} sheetLabel={orderSheetLabel} onBack={() => setView('home')} />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+        />
+      </>
+    );
   }
 
   if (images.length > 0) {
-    return <Editor images={images} onCancel={() => setImages([])} onOrder={handleOrder} />;
+    return (
+      <>
+        <Editor images={images} onCancel={() => setImages([])} onOrder={handleOrder} />
+        <GlobalModals
+          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+          showRefund={showRefund} setShowRefund={setShowRefund}
+          showSupport={showSupport} setShowSupport={setShowSupport}
+        />
+      </>
+    );
   }
 
   return (
@@ -517,202 +559,13 @@ function App() {
         </div>
       </footer>
 
-      {/* Data Protection Modal */}
-      {showPrivacy && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
-        }} onClick={() => setShowPrivacy(false)}>
-          <div style={{
-            background: '#fff', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
-            position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxHeight: '90vh', overflowY: 'auto'
-          }} onClick={e => e.stopPropagation()}>
-            <button
-              onClick={() => setShowPrivacy(false)}
-              style={{
-                position: 'absolute', top: 24, right: 24, background: '#F1F5F9', border: 'none',
-                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#64748B'
-              }}
-            >
-              <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} />
-            </button>
-
-            <div style={{ width: 48, height: 48, background: '#EFF6FF', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, color: '#2563EB' }}>
-              <ShieldCheck style={{ width: 24, height: 24 }} />
-            </div>
-
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>Data Protection</h2>
-            <p style={{ fontSize: 16, fontWeight: 600, color: '#334155', marginBottom: 24 }}>Your privacy is our priority.</p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              {[
-                'Photos are processed securely.',
-                'No permanent storage of your images.',
-                'No sharing of personal data with third parties.',
-                'Secure browser-based processing for maximum safety.',
-                'SelfieSePassport ensures your images remain private and protected at all times.'
-              ].map((text, i) => (
-                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-                  <CheckCircle style={{ width: 18, height: 18, color: '#22C55E', marginTop: 2, flexShrink: 0 }} />
-                  <span style={{ fontSize: 15, color: '#475569', lineHeight: 1.5 }}>{text}</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => setShowPrivacy(false)}
-              style={{
-                marginTop: 32, width: '100%', background: '#0F172A', color: '#fff', border: 'none',
-                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Refund Policy Modal */}
-      {showRefund && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
-        }} onClick={() => setShowRefund(false)}>
-          <div style={{
-            background: '#fff', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
-            position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxHeight: '90vh', overflowY: 'auto'
-          }} onClick={e => e.stopPropagation()}>
-            <button
-              onClick={() => setShowRefund(false)}
-              style={{
-                position: 'absolute', top: 24, right: 24, background: '#F1F5F9', border: 'none',
-                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#64748B'
-              }}
-            >
-              <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} />
-            </button>
-
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Refund Policy</h2>
-            <p style={{ fontSize: 15, color: '#64748B', marginBottom: 24 }}>At SelfieSePassport, customer satisfaction is our priority.</p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-              {/* Eligibility */}
-              <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>✅</span> Eligibility for Refund
-                </h3>
-                <p style={{ fontSize: 14, color: '#334155', marginBottom: 8 }}>You are eligible for a full refund if:</p>
-                <ul style={{ paddingLeft: 20, fontSize: 14, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <li>Your generated passport photo is rejected due to non-compliance with official size or background standards.</li>
-                  <li>There is a technical error in processing your photo.</li>
-                </ul>
-              </div>
-
-              {/* Non-Refundable */}
-              <div>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>❌</span> Non-Refundable Cases
-                </h3>
-                <p style={{ fontSize: 14, color: '#334155', marginBottom: 8 }}>Refunds will not be issued if:</p>
-                <ul style={{ paddingLeft: 20, fontSize: 14, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <li>The uploaded photo does not follow the provided Photo Guidelines.</li>
-                  <li>The rejection is due to incorrect user-uploaded image (blur, wrong lighting, wrong pose, etc.).</li>
-                  <li>The final photo was downloaded successfully and meets standard specifications.</li>
-                </ul>
-              </div>
-
-              {/* Process */}
-              <div style={{ background: '#F8FAFC', padding: 16, borderRadius: 12 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span>📌</span> Refund Process
-                </h3>
-                <ul style={{ paddingLeft: 20, fontSize: 14, color: '#475569', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <li>Contact our support team within 48 hours of rejection.</li>
-                  <li>Provide proof of rejection (receipt or written reason).</li>
-                  <li>Refunds will be processed within 5–7 working days after verification.</li>
-                </ul>
-              </div>
-
-            </div>
-
-            <button
-              onClick={() => setShowRefund(false)}
-              style={{
-                marginTop: 32, width: '100%', background: '#0F172A', color: '#fff', border: 'none',
-                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* Support Modal */}
-      {showSupport && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 100,
-          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
-        }} onClick={() => setShowSupport(false)}>
-          <div style={{
-            background: '#fff', borderRadius: 24, padding: 40, maxWidth: 500, width: '100%',
-            position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-            textAlign: 'center'
-          }} onClick={e => e.stopPropagation()}>
-            <button
-              onClick={() => setShowSupport(false)}
-              style={{
-                position: 'absolute', top: 24, right: 24, background: '#F1F5F9', border: 'none',
-                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', color: '#64748B'
-              }}
-            >
-              <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} />
-            </button>
-
-            <div style={{ width: 64, height: 64, background: '#EFF6FF', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#2563EB' }}>
-              <div style={{ fontSize: 32 }}>👋</div>
-            </div>
-
-            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Need help?</h2>
-            <p style={{ fontSize: 16, color: '#64748B', marginBottom: 32 }}>We're here for you.</p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div style={{ padding: 16, background: '#F8FAFC', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ fontSize: 24 }}>📱</div>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>Contact No</p>
-                  <p style={{ fontSize: 16, color: '#0F172A', fontWeight: 700 }}>+91 8617371378</p>
-                </div>
-              </div>
-
-              <div style={{ padding: 16, background: '#F8FAFC', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 16 }}>
-                <div style={{ fontSize: 24 }}>📧</div>
-                <div style={{ textAlign: 'left' }}>
-                  <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>Email</p>
-                  <p style={{ fontSize: 16, color: '#0F172A', fontWeight: 700 }}>anupmondal345@gmail.com</p>
-                </div>
-              </div>
-            </div>
-
-            <button
-              onClick={() => setShowSupport(false)}
-              style={{
-                marginTop: 32, width: '100%', background: '#0F172A', color: '#fff', border: 'none',
-                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* Global Modals for Privacy, Refund, and Support */}
+      <GlobalModals
+        showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
+        showRefund={showRefund} setShowRefund={setShowRefund}
+        showSupport={showSupport} setShowSupport={setShowSupport}
+        showSubscription={showSubscription} setShowSubscription={setShowSubscription}
+      />
 
       {/* Responsive media query via style tag */}
       <style>{`
