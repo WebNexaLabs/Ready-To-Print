@@ -287,6 +287,26 @@ export default function Editor({ images, onCancel, onOrder }) {
         });
     };
 
+    // Downscale image for faster BG removal — passport photos don't need 4000px for AI
+    const downscaleForBgRemoval = async (blob, maxDim = 1024) => {
+        const img = await createImage(URL.createObjectURL(blob));
+        const { naturalWidth: w, naturalHeight: h } = img;
+
+        // Skip if already small enough
+        if (w <= maxDim && h <= maxDim) return blob;
+
+        const scale = maxDim / Math.max(w, h);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        return new Promise((resolve) => {
+            canvas.toBlob((b) => resolve(b), 'image/png');
+        });
+    };
+
     const handleProcess = async () => {
         try {
             setIsProcessing(true);
@@ -315,12 +335,16 @@ export default function Editor({ images, onCancel, onOrder }) {
                     const response = await fetch(croppedUrl);
                     const blob = await response.blob();
 
+                    // Downscale for faster AI processing
+                    const smallBlob = await downscaleForBgRemoval(blob, 1024);
+
                     let removedBgBlob;
 
                     setProcessingStatus(`Removing background (photo ${i + 1})...`);
-                    // Pass debug/quality flags if possible, but default is usually balanced.
-                    // processing on raw image improves edge detection significantly.
-                    removedBgBlob = await removeBackground(blob, { output: { format: 'image/png' } });
+                    removedBgBlob = await removeBackground(smallBlob, {
+                        model: 'medium',
+                        output: { format: 'image/png', quality: 0.8 },
+                    });
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
                     setProcessingStatus(`Applying adjustments (photo ${i + 1})...`);
@@ -703,19 +727,7 @@ export default function Editor({ images, onCancel, onOrder }) {
 
                             {/* Download Buttons */}
                             <div className="download-section" style={{ padding: 24 }}>
-                                {activePageSize.id !== 'a4' && (
-                                    <button
-                                        onClick={() => downloadPdf(result.sheets[activePageSize.id], activePageSize.widthInch, activePageSize.heightInch, `passport-sheet-${activePageSize.id}-${selectedDoc.id}.pdf`)}
-                                        style={{
-                                            width: '100%', background: '#2563EB', color: '#fff', border: 'none',
-                                            padding: '16px 24px', borderRadius: 12, fontWeight: 700, fontSize: 15,
-                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                            boxShadow: '0 4px 14px rgba(37,99,235,0.3)', marginBottom: 12
-                                        }}
-                                    >
-                                        <FileImage style={{ width: 18, height: 18 }} /> Download {activePageSize.label} Sheet (PDF)
-                                    </button>
-                                )}
+
 
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     <button
@@ -744,6 +756,20 @@ export default function Editor({ images, onCancel, onOrder }) {
                                         }}
                                     >
                                         <FileImage style={{ width: 16, height: 16 }} /> Digital PDF
+                                    </button>
+                                </div>
+
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                    <button
+                                        onClick={() => downloadPdf(result.sheets[activePageSize.id], activePageSize.widthInch, activePageSize.heightInch, `passport-${activePageSize.id}-sheet-${selectedDoc.id}.pdf`)}
+                                        style={{
+                                            flex: 1, minWidth: 160, background: '#2563EB', color: '#fff', border: 'none',
+                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                            whiteSpace: 'nowrap', boxShadow: '0 4px 12px rgba(37,99,235,0.2)'
+                                        }}
+                                    >
+                                        <FileImage style={{ width: 16, height: 16 }} /> Download {activePageSize.label} Sheet (PDF)
                                     </button>
 
                                     <button
@@ -998,7 +1024,7 @@ export default function Editor({ images, onCancel, onOrder }) {
                                 {processingStatus || 'Processing...'}
                             </p>
                             <p style={{ marginTop: 8, fontSize: 13, color: '#94A3B8' }}>
-                                This may take 15-30 seconds for background removal
+                                This may take 10-15 seconds for background removal
                             </p>
                             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
                         </div>
