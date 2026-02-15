@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Check, X, ShieldCheck, Truck, Zap, Info, ArrowRight, Printer, Star, Camera } from 'lucide-react';
 
-const Pricing = ({ onOrder }) => {
+const Pricing = ({ onOrder, onNavigate, onSupport }) => {
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -200,10 +200,10 @@ const Pricing = ({ onOrder }) => {
                         <span style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>SelfieSePassport</span>
                     </div>
                     <div style={{ display: 'flex', gap: 24, fontSize: 13, color: '#94A3B8' }}>
-                        <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Privacy Policy</a>
-                        <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Terms of Service</a>
-                        <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Shipping Info</a>
-                        <a href="#" style={{ color: 'inherit', textDecoration: 'none' }}>Contact</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Privacy Policy</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('terms'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Terms of Service</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('guidelines'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Photo Guidelines</a>
+                        <a href="#" onClick={(e) => { e.preventDefault(); onSupport(); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Contact Support</a>
                     </div>
                 </div>
                 <div style={{ maxWidth: 1200, margin: '40px auto 0', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>

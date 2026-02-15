@@ -42,11 +42,14 @@ const Login = ({ onBack, onSignup }) => {
                 padding: 40, position: 'relative', overflow: 'hidden'
             }}>
                 <div style={{ zIndex: 10, textAlign: 'center', maxWidth: 480 }}>
-                    <div style={{
-                        width: 80, height: 80, background: 'rgba(255,255,255,0.1)',
-                        borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        margin: '0 auto 32px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)'
-                    }}>
+                    <div
+                        onClick={onBack}
+                        style={{
+                            width: 80, height: 80, background: 'rgba(255,255,255,0.1)',
+                            borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 32px', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.2)',
+                            cursor: 'pointer'
+                        }}>
                         <Camera style={{ width: 40, height: 40, color: '#fff' }} />
                     </div>
 
@@ -112,7 +115,10 @@ const Login = ({ onBack, onSignup }) => {
                 <div style={{ maxWidth: 400, width: '100%', margin: '0 auto' }}>
 
                     {/* Mobile/Form Header Branding */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+                    <div
+                        onClick={onBack}
+                        style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, cursor: 'pointer' }}
+                    >
                         <div style={{ width: 28, height: 28, background: '#2563EB', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <Camera style={{ width: 16, height: 16 }} />
                         </div>

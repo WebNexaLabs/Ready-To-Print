@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Camera, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Smartphone, KeyRound, User } from 'lucide-react';
 
-const Signup = ({ onLogin }) => {
+const Signup = ({ onLogin, onBack }) => {
     const [showPassword, setShowPassword] = useState(false);
 
     // Form State
@@ -48,7 +48,10 @@ const Signup = ({ onLogin }) => {
                 justifyContent: 'center'
             }}>
                 <div style={{ marginBottom: 40 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32 }}>
+                    <div
+                        onClick={onBack}
+                        style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 32, cursor: 'pointer' }}
+                    >
                         <div style={{ width: 48, height: 48, background: '#fff', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <Camera style={{ width: 24, height: 24, color: '#1E40AF' }} />
                         </div>
