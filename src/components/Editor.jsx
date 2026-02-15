@@ -871,6 +871,9 @@ export default function Editor({ images, onCancel, onOrder }) {
                                     value={zoom}
                                     onChange={(e) => setZoom(Number(e.target.value))}
                                     className="zoom-slider"
+                                    style={{
+                                        backgroundSize: `${(zoom - 1) / 2 * 100}% 100%`
+                                    }}
                                 />
                             </div>
 

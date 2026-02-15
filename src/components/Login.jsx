@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Camera, Mail, Lock, Eye, EyeOff, CheckCircle, ArrowLeft, Smartphone, KeyRound } from 'lucide-react';
 
-const Login = ({ onBack }) => {
+const Login = ({ onBack, onSignup }) => {
     const [authMethod, setAuthMethod] = useState('email'); // 'email' | 'mobile'
     const [showPassword, setShowPassword] = useState(false);
 
@@ -334,7 +334,7 @@ const Login = ({ onBack }) => {
                     </div>
 
                     <div style={{ marginTop: 40, textAlign: 'center', fontSize: 14, color: '#475569' }}>
-                        Don't have an account? <a href="#" style={{ fontWeight: 600, color: '#1E40AF', textDecoration: 'none' }}>Create an Account</a>
+                        Don't have an account? <button onClick={onSignup} style={{ fontWeight: 600, color: '#1E40AF', textDecoration: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Create an Account</button>
                     </div>
 
                     <div style={{ marginTop: 60, display: 'flex', justifyContent: 'center', gap: 24, fontSize: 11, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>

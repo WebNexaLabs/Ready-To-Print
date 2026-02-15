@@ -4,6 +4,11 @@ import { Camera, CheckCircle, Smartphone, MapPin, CreditCard, ShieldCheck, Truck
 
 const OrderPrints = ({ image, sheetLabel = 'A4', onBack }) => {
     const [quantity, setQuantity] = useState(1);
+    const [pincode, setPincode] = useState('');
+    const [city, setCity] = useState('');
+    const [state, setState] = useState('');
+    const [loadingPincode, setLoadingPincode] = useState(false);
+
     const pricePerSheet = (sheetLabel.includes('4x6') || sheetLabel.includes('4×6')) ? 49 : 84;
     const deliveryCharge = 15;
     const subtotal = quantity * pricePerSheet;
@@ -11,6 +16,27 @@ const OrderPrints = ({ image, sheetLabel = 'A4', onBack }) => {
 
     const handleIncrement = () => setQuantity(q => q + 1);
     const handleDecrement = () => setQuantity(q => Math.max(1, q - 1));
+
+    const handlePincodeChange = async (e) => {
+        const code = e.target.value.replace(/\D/g, '').slice(0, 6);
+        setPincode(code);
+
+        if (code.length === 6) {
+            setLoadingPincode(true);
+            try {
+                const response = await fetch(`https://api.postalpincode.in/pincode/${code}`);
+                const data = await response.json();
+                if (data[0].Status === 'Success') {
+                    const postOffice = data[0].PostOffice[0];
+                    setCity(postOffice.District);
+                    setState(postOffice.State);
+                }
+            } catch (error) {
+                console.error("Failed to fetch pincode details", error);
+            }
+            setLoadingPincode(false);
+        }
+    };
 
     return (
         <div style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Inter', sans-serif" }}>
@@ -134,9 +160,40 @@ const OrderPrints = ({ image, sheetLabel = 'A4', onBack }) => {
                                 <textarea rows={3} placeholder="Flat No, Street, Area" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none', resize: 'none' }}></textarea>
                             </div>
 
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 16 }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Pincode</label>
+                                    <input
+                                        type="text"
+                                        placeholder="6-digit Pincode"
+                                        value={pincode}
+                                        onChange={handlePincodeChange}
+                                        maxLength={6}
+                                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: `1px solid ${loadingPincode ? '#2563EB' : '#E2E8F0'}`, fontSize: 14, outline: 'none' }}
+                                    />
+                                    {loadingPincode && <span style={{ fontSize: 11, color: '#2563EB', marginTop: 4, display: 'block' }}>Fetching details...</span>}
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#334155', marginBottom: 6 }}>City</label>
+                                    <input
+                                        type="text"
+                                        placeholder="City"
+                                        value={city}
+                                        readOnly
+                                        style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 14, outline: 'none', color: '#64748B' }}
+                                    />
+                                </div>
+                            </div>
+
                             <div style={{ marginBottom: 24 }}>
-                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#334155', marginBottom: 6 }}>Pincode</label>
-                                <input type="text" placeholder="6-digit Pincode" style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E2E8F0', fontSize: 14, outline: 'none' }} />
+                                <label style={{ display: 'block', fontSize: 13, fontWeight: 600, color: '#334155', marginBottom: 6 }}>State</label>
+                                <input
+                                    type="text"
+                                    placeholder="State"
+                                    value={state}
+                                    readOnly
+                                    style={{ width: '100%', padding: '10px 12px', borderRadius: 8, border: '1px solid #E2E8F0', background: '#F8FAFC', fontSize: 14, outline: 'none', color: '#64748B' }}
+                                />
                             </div>
 
                             <div style={{ borderTop: '1px solid #E2E8F0', paddingTop: 20, marginBottom: 24 }}>

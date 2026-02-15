@@ -3,13 +3,17 @@ import { ShieldCheck, Scissors, ArrowRight, Camera, Printer, FileText, CheckCirc
 import Editor from './components/Editor';
 import UploadSection from './components/UploadSection';
 import Login from './components/Login';
+import Signup from './components/Signup';
 import Pricing from './components/Pricing';
+import PhotoGuidelines from './components/PhotoGuidelines';
 import OrderPrints from './components/OrderPrints';
 import { documentTypes } from './data/countries';
 
 function App() {
   const [images, setImages] = useState([]);
-  const [view, setView] = useState('home'); // 'home', 'login', 'order', 'pricing'
+  const [view, setView] = useState('home'); // 'home', 'login', 'signup', 'order', 'pricing', 'guidelines'
+  const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
   const [orderImage, setOrderImage] = useState(null);
   const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
 
@@ -24,7 +28,11 @@ function App() {
   };
 
   if (view === 'login') {
-    return <Login onBack={() => setView('home')} />;
+    return <Login onBack={() => setView('home')} onSignup={() => setView('signup')} />;
+  }
+
+  if (view === 'signup') {
+    return <Signup onLogin={() => setView('login')} />;
   }
 
   if (view === 'pricing') {
@@ -45,7 +53,7 @@ function App() {
               <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
               <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Pricing</a>
               <a href="#" style={{ color: '#64748B', textDecoration: 'none' }}>Photo Guidelines</a>
-              <a href="#" style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
             </nav>
             <div className="header-actions">
               <button
@@ -58,6 +66,40 @@ function App() {
           </div>
         </div>
         <Pricing onOrder={() => setView('home')} />
+      </>
+    );
+  }
+
+  if (view === 'guidelines') {
+    return (
+      <>
+        <div style={{ background: '#fff', borderBottom: '1px solid #E2E8F0', padding: '0 24px', position: 'sticky', top: 0, zIndex: 50 }}>
+          <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }} onClick={() => setView('home')}>
+              <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+                <Camera style={{ width: 16, height: 16 }} />
+              </div>
+              <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
+              </span>
+            </div>
+            <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B', display: 'flex', gap: 24 }}>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('home'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Home</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('pricing'); }} style={{ color: '#64748B', textDecoration: 'none' }}>Pricing</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setView('guidelines'); }} style={{ color: '#2563EB', textDecoration: 'none' }}>Photo Guidelines</a>
+              <a href="#" onClick={(e) => { e.preventDefault(); setShowSupport(true); }} style={{ color: '#64748B', textDecoration: 'none' }}>Support</a>
+            </nav>
+            <div className="header-actions">
+              <button
+                onClick={() => setView('login')}
+                style={{ background: '#EFF6FF', border: 'none', padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, color: '#2563EB', cursor: 'pointer' }}
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+        <PhotoGuidelines />
       </>
     );
   }
@@ -98,6 +140,12 @@ function App() {
                   } else if (item === 'Home') {
                     e.preventDefault();
                     setView('home');
+                  } else if (item === 'Photo Guidelines') {
+                    e.preventDefault();
+                    setView('guidelines');
+                  } else if (item === 'Support') {
+                    e.preventDefault();
+                    setShowSupport(true);
                   }
                 }}
                 onMouseEnter={e => e.target.style.color = '#2563EB'}
@@ -173,7 +221,7 @@ function App() {
               </div>
 
               <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>
-                Indian Biometric Analysis
+                Passport Photo AI Validation
               </p>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 20 }}>
@@ -204,13 +252,9 @@ function App() {
                 border: '1px solid #F1F5F9'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <div style={{ width: 28, height: 20, background: '#FF9933', borderRadius: 3, position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: '33%', width: '100%', height: '34%', background: '#fff' }}></div>
-                    <div style={{ position: 'absolute', bottom: 0, width: '100%', height: '33%', background: '#138808' }}></div>
-                  </div>
                   <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Indian Passport Photo</p>
-                    <p style={{ fontSize: 11, color: '#94A3B8' }}>3.5 × 3.5 cm • White BG</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Passport Photo</p>
+                    <p style={{ fontSize: 11, color: '#94A3B8' }}>35mm × 45mm • White Background</p>
                   </div>
                 </div>
                 <div style={{
@@ -229,10 +273,10 @@ function App() {
       <section style={{ padding: '60px 24px', background: '#fff', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="features-grid">
           {[
-            { icon: '🖨️', title: 'Multi-Layout Printing', desc: 'Print-ready layouts in A4, 4x6, and 6x4 paper sizes for easy printing.' },
-            { icon: '🎯', title: 'Eye-Active Detection', desc: 'AI checks for closed eyes, red-eye, and ensures a natural look per Indian norms.' },
             { icon: '✨', title: 'Instant BG Removal', desc: 'Convert any background to official white or white in two clicks.' },
-            { icon: '🛡️', title: 'Rejection Insurance', desc: 'If your photo is rejected by the Passport Seva Kendra, we provide a full refund.' }
+            { icon: '🎯', title: 'Eye-Active Detection', desc: 'AI checks for closed eyes, red-eye, and ensures a natural look per Indian norms.' },
+            { icon: '🖨️', title: 'Multi-Layout Printing', desc: 'Print-ready layouts in A4, 4x6 and sizes for easy printing.' },
+            { icon: '🖼️', title: 'Multiple Different Photos at Once', desc: 'Generate multiple different passport-size photos in a single click for instant printing.' }
           ].map((f, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 8 }}>
               <div style={{
@@ -280,55 +324,7 @@ function App() {
       </section>
 
       {/* Multi-Layout Preview */}
-      <section style={{ padding: '60px 24px', background: '#fff' }}>
-        <div style={{ maxWidth: 1280, margin: '0 auto' }}>
-          <div className="multi-layout-section">
-            <div style={{
-              flex: 1, background: '#F8FAFC', borderRadius: 20, padding: 28,
-              border: '1px solid #E2E8F0', position: 'relative'
-            }}>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                <span style={{ background: '#2563EB', color: '#fff', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 6 }}>4x6</span>
-                <span style={{ background: '#E2E8F0', color: '#64748B', fontSize: 11, fontWeight: 700, padding: '4px 12px', borderRadius: 6 }}>A4</span>
-              </div>
-              <div style={{
-                display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8,
-                background: '#fff', borderRadius: 12, padding: 16, border: '1px solid #E2E8F0'
-              }}>
-                {[1, 2, 3, 4].map(i => (
-                  <div key={i} style={{
-                    aspectRatio: '3/4', background: '#F1F5F9', borderRadius: 8,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 28, color: '#CBD5E1'
-                  }}>👤</div>
-                ))}
-              </div>
-              <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 12 }}>
-                4x6 SHEET · MULTI-PHOTO · 51x51MM
-              </p>
-            </div>
 
-            <div style={{ flex: 1 }}>
-              <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
-                Multi-layout Printing for Local Photo Labs
-              </h2>
-              <p style={{ fontSize: 14, color: '#64748B', lineHeight: 1.7, marginBottom: 24 }}>
-                Don't pay overpriced shops at studios. Generate a single sheet containing the passport photos perfectly arranged for standard Indian photo paper sizes like 4×6 or 5×7 inches.
-              </p>
-              {[
-                'Perfect for A4, 4x6, and 5 × 7 paper',
-                'High resolution 300+ DPI output',
-                'Print at any local shop or home printer'
-              ].map((tip, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-                  <CheckCircle style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0 }} />
-                  <span style={{ fontSize: 14, color: '#334155' }}>{tip}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* CTA */}
       <section style={{ padding: '60px 24px' }}>
@@ -389,28 +385,29 @@ function App() {
               <p style={{ fontSize: 13, color: '#64748B', maxWidth: 280, lineHeight: 1.7, marginBottom: 16 }}>
                 Trusted biometric photo processor tailored for Indian government document standards.
               </p>
-              <div style={{ display: 'flex', gap: 12 }}>
-                {['F', 'T', 'I'].map(s => (
-                  <div key={s} style={{
-                    width: 32, height: 32, borderRadius: '50%', background: '#E2E8F0',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 12, fontWeight: 700, color: '#64748B', cursor: 'pointer'
-                  }}>{s}</div>
-                ))}
-              </div>
+
             </div>
 
             {[
-              { title: 'Documents', links: ['Indian Passport', 'Visa & OCI Ayoge', 'OCI Application', 'Voter ID Photo'] },
-              { title: 'Resources', links: ['Pricing', 'Refund Policy', 'Contact Support', 'Compliance Check'] },
-              { title: 'Compliance', links: ['MEA Standards', 'ICAO Compliant', 'Data Protection'] }
+              { title: 'Quick Links', links: ['Pricing', 'Refund Policy', 'Contact Support', 'Data Protection'] }
             ].map((col, i) => (
               <div key={i}>
                 <h4 style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>{col.title}</h4>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                   {col.links.map(link => (
                     <li key={link} style={{ marginBottom: 12 }}>
-                      <a href="#" style={{ fontSize: 13, color: '#64748B', textDecoration: 'none' }}
+                      <a href="#"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          if (link === 'Data Protection') {
+                            setShowPrivacy(true);
+                          } else if (link === 'Pricing') {
+                            setView('pricing');
+                          } else if (link === 'Contact Support') {
+                            setShowSupport(true);
+                          }
+                        }}
+                        style={{ fontSize: 13, color: '#64748B', textDecoration: 'none' }}
                         onMouseEnter={e => e.target.style.color = '#2563EB'}
                         onMouseLeave={e => e.target.style.color = '#64748B'}
                       >{link}</a>
@@ -437,6 +434,124 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* Data Protection Modal */}
+      {showPrivacy && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+        }} onClick={() => setShowPrivacy(false)}>
+          <div style={{
+            background: '#fff', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
+            position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowPrivacy(false)}
+              style={{
+                position: 'absolute', top: 24, right: 24, background: '#F1F5F9', border: 'none',
+                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#64748B'
+              }}
+            >
+              <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} /> {/* Using ArrowRight as Close icon equivalent if X not available, but user has lucide-react so X likely exists. I saw ArrowRight imported. I will use X if imported or ArrowRight as fallback. Wait, I didn't see X imported. I'll rely on what I saw or add import. I'll check imports again. */}
+            </button>
+
+            <div style={{ width: 48, height: 48, background: '#EFF6FF', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 24, color: '#2563EB' }}>
+              <ShieldCheck style={{ width: 24, height: 24 }} />
+            </div>
+
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>Data Protection</h2>
+            <p style={{ fontSize: 16, fontWeight: 600, color: '#334155', marginBottom: 24 }}>Your privacy is our priority.</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              {[
+                'Photos are processed securely.',
+                'No permanent storage of your images.',
+                'No sharing of personal data with third parties.',
+                'Secure browser-based processing for maximum safety.',
+                'SelfieSePassport ensures your images remain private and protected at all times.'
+              ].map((text, i) => (
+                <div key={i} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                  <CheckCircle style={{ width: 18, height: 18, color: '#22C55E', marginTop: 2, flexShrink: 0 }} />
+                  <span style={{ fontSize: 15, color: '#475569', lineHeight: 1.5 }}>{text}</span>
+                </div>
+              ))}
+            </div>
+
+            <button
+              onClick={() => setShowPrivacy(false)}
+              style={{
+                marginTop: 32, width: '100%', background: '#0F172A', color: '#fff', border: 'none',
+                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Support Modal */}
+      {showSupport && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 100,
+          background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
+        }} onClick={() => setShowSupport(false)}>
+          <div style={{
+            background: '#fff', borderRadius: 24, padding: 40, maxWidth: 500, width: '100%',
+            position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+            textAlign: 'center'
+          }} onClick={e => e.stopPropagation()}>
+            <button
+              onClick={() => setShowSupport(false)}
+              style={{
+                position: 'absolute', top: 24, right: 24, background: '#F1F5F9', border: 'none',
+                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                cursor: 'pointer', color: '#64748B'
+              }}
+            >
+              <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} />
+            </button>
+
+            <div style={{ width: 64, height: 64, background: '#EFF6FF', borderRadius: 20, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', color: '#2563EB' }}>
+              <div style={{ fontSize: 32 }}>👋</div>
+            </div>
+
+            <h2 style={{ fontSize: 24, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Need help?</h2>
+            <p style={{ fontSize: 16, color: '#64748B', marginBottom: 32 }}>We're here for you.</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={{ padding: 16, background: '#F8FAFC', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ fontSize: 24 }}>📱</div>
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>Contact No</p>
+                  <p style={{ fontSize: 16, color: '#0F172A', fontWeight: 700 }}>+91 8617371378</p>
+                </div>
+              </div>
+
+              <div style={{ padding: 16, background: '#F8FAFC', borderRadius: 12, display: 'flex', alignItems: 'center', gap: 16 }}>
+                <div style={{ fontSize: 24 }}>📧</div>
+                <div style={{ textAlign: 'left' }}>
+                  <p style={{ fontSize: 13, color: '#64748B', fontWeight: 600 }}>Email</p>
+                  <p style={{ fontSize: 16, color: '#0F172A', fontWeight: 700 }}>anupmondal345@gmail.com</p>
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSupport(false)}
+              style={{
+                marginTop: 32, width: '100%', background: '#0F172A', color: '#fff', border: 'none',
+                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
+              }}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Responsive media query via style tag */}
       <style>{`
