@@ -456,6 +456,9 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         // does this automatically. Let's configure it safely.
                         env.allowLocalModels = false;
 
+                        // Use HF Mirror to bypass ISP blocks in certain regions (like India) which causes "Failed to fetch"
+                        env.remoteHost = 'https://hf-mirror.com';
+
                         // Load the background removal model (main branch now natively supports ONNX for Transformers.js)
                         const segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
                             progress_callback: (info) => {
