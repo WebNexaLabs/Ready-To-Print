@@ -450,80 +450,20 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         removedBgBlob = await removeBgResponse.blob();
                     } else {
                         setProcessingStatus(`Loading AI Model (photo ${i + 1})...`);
-                        const { pipeline, env } = await import('@huggingface/transformers');
-
-                        // We do not want to download the model into the browser cache every time, but transformers.js
-                        // does this automatically. Let's configure it safely.
-                        env.allowLocalModels = false;
-
-                        // Use HF Mirror to bypass ISP blocks in certain regions (like India) which causes "Failed to fetch"
-                        env.remoteHost = 'https://hf-mirror.com';
-
-                        // Explicitly bind the WASM executing binaries to the un-optimized /public folder deployment
-                        env.backends.onnx.wasm.wasmPaths = '/wasm/';
-
-                        // Load the background removal model (main branch now natively supports ONNX for Transformers.js)
-                        const segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
-                            progress_callback: (info) => {
-                                if (info.status === 'progress') {
-                                    setProcessingStatus(`Downloading Model: ${Math.round(info.progress)}%`);
-                                } else if (info.status === 'ready') {
-                                    setProcessingStatus(`Model Loaded. Segmenting (photo ${i + 1})...`);
+                        const { removeBackground } = await import('@imgly/background-removal');
+                        let lastPercent = -1;
+                        // Pass the uniquely named File object to break internal caches
+                        removedBgBlob = await removeBackground(uniqueFile, {
+                            model: 'medium',
+                            output: { format: 'image/png', quality: 0.8 },
+                            progress: (key, current, total) => {
+                                const percent = total > 0 ? Math.round((current / total) * 100) : 0;
+                                if (percent !== lastPercent) {
+                                    lastPercent = percent;
+                                    setProcessingStatus(`Loading AI Model... ${percent}%`);
                                 }
                             }
                         });
-
-                        // Process the image. We can pass the URL directly.
-                        setProcessingStatus(`Segmenting (photo ${i + 1})...`);
-                        const output = await segmenter(croppedUrl);
-
-                        // For RMBG-1.4, the output is an array of masks or a single object. 
-                        // Usually it returns a RawImage mask. In transformers.js for briaai:
-                        // output can be a direct mask. We need to apply this mask to the original image.
-                        // Actually, transformers.js image-segmentation pipeline returns an array of { label, mask: RawImage }.
-                        // But wait! Many times it just returns the foreground as an image buffer or a blob.
-                        // Wait, no. Transformers docs say: return object with `mask` (RawImage).
-
-                        const maskImage = Array.isArray(output) ? output[0].mask : output.mask;
-
-                        // Convert RawImage to a canvas to combine with original
-                        const maskCanvas = document.createElement('canvas');
-                        maskCanvas.width = maskImage.width;
-                        maskCanvas.height = maskImage.height;
-                        const maskCtx = maskCanvas.getContext('2d');
-                        // Convert the 1-channel (grayscale) tensor from RMBG to a 4-channel RGBA array for Canvas
-                        const maskDataRaw = maskImage.data;
-                        console.log('TRANSFORMERS.JS MASK:', { w: maskImage.width, h: maskImage.height, len: maskDataRaw.length });
-                        const rgbaData = new Uint8ClampedArray(maskImage.width * maskImage.height * 4);
-                        for (let j = 0; j < maskDataRaw.length; ++j) {
-                            rgbaData[j * 4 + 0] = 0; // R (Doesn't matter for destination-in, only Alpha matters)
-                            rgbaData[j * 4 + 1] = 0; // G
-                            rgbaData[j * 4 + 2] = 0; // B
-                            rgbaData[j * 4 + 3] = maskDataRaw[j]; // A (Grayscale intensity becomes Alpha transparency)
-                        }
-
-                        const maskData = new ImageData(rgbaData, maskImage.width, maskImage.height);
-                        maskCtx.putImageData(maskData, 0, 0);
-
-                        // Load original image into canvas
-                        const imgEl = new Image();
-                        imgEl.src = croppedUrl;
-                        await new Promise(r => { imgEl.onload = r; });
-
-                        const finalCanvas = document.createElement('canvas');
-                        finalCanvas.width = imgEl.width;
-                        finalCanvas.height = imgEl.height;
-                        const finalCtx = finalCanvas.getContext('2d');
-
-                        // Draw original image
-                        finalCtx.drawImage(imgEl, 0, 0);
-
-                        // Apply the mask
-                        finalCtx.globalCompositeOperation = 'destination-in';
-                        finalCtx.drawImage(maskCanvas, 0, 0, imgEl.width, imgEl.height);
-
-                        // Convert back to blob
-                        removedBgBlob = await new Promise(r => finalCanvas.toBlob(r, 'image/png', 1.0));
                     }
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
