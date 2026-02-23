@@ -459,6 +459,9 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         // Use HF Mirror to bypass ISP blocks in certain regions (like India) which causes "Failed to fetch"
                         env.remoteHost = 'https://hf-mirror.com';
 
+                        // Explicitly bind the WASM executing binaries to CDN to prevent Cloudflare/Vite chunk resolution failures
+                        env.backends.onnx.wasm.wasmPaths = 'https://cdn.jsdelivr.net/npm/@huggingface/transformers@3.3.2/dist/';
+
                         // Load the background removal model (main branch now natively supports ONNX for Transformers.js)
                         const segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
                             progress_callback: (info) => {
