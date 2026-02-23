@@ -127,7 +127,15 @@ function App() {
   if (images.length > 0) {
     return (
       <>
-        <Editor images={images} onCancel={() => setImages([])} onOrder={handleOrder} />
+        <Editor
+          images={images}
+          onCancel={() => setImages([])}
+          onOrder={handleOrder}
+          onRemoveImage={(index) => {
+            const newImages = images.filter((_, i) => i !== index);
+            setImages(newImages);
+          }}
+        />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
           showRefund={showRefund} setShowRefund={setShowRefund}

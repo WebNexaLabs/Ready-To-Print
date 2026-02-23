@@ -1,13 +1,13 @@
 import { useState, useCallback, useEffect } from 'react';
 import Cropper from 'react-easy-crop';
-import { removeBackground } from '@imgly/background-removal';
 import { documentTypes } from '../data/countries';
 import { generatePhotoSheet, PAGE_SIZES, getMaxPhotosPerPage } from '../utils/photoGenerator';
 import { jsPDF } from 'jspdf';
 import {
     Download, ChevronLeft, ZoomIn, ZoomOut, Check, RotateCw, RotateCcw,
     Sun, Sliders, ArrowRight, Printer, FileImage, RefreshCw,
-    Camera, ShieldCheck, CheckCircle, Lock, Sparkles, Shield, FlipHorizontal, Palette
+    Camera, ShieldCheck, CheckCircle, Lock, Sparkles, Shield, FlipHorizontal, Palette,
+    Smartphone, Cloud
 } from 'lucide-react';
 
 const BG_PRESETS = [
@@ -19,7 +19,7 @@ const BG_PRESETS = [
     { label: 'Cream', color: '#FEF9C3' },
 ];
 
-export default function Editor({ images, onCancel, onOrder }) {
+export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentImage = images[currentIndex];
 
@@ -56,6 +56,7 @@ export default function Editor({ images, onCancel, onOrder }) {
     const [brightness, setBrightness] = useState(0);
     const [contrast, setContrast] = useState(10);
     const [bgRemoval, setBgRemoval] = useState(true);
+    const [aiEngine, setAiEngine] = useState('imgly'); // 'imgly' or 'removebg'
     const [bgColor, setBgColor] = useState('#FFFFFF');
     const [selectedDoc, setSelectedDoc] = useState(documentTypes[0]);
     const [aspect, setAspect] = useState(documentTypes[0].ratio);
@@ -172,8 +173,12 @@ export default function Editor({ images, onCancel, onOrder }) {
     }, [currentImage, currentIndex]);
 
     const onCropComplete = useCallback((croppedArea, croppedAreaPixels) => {
-        setCroppedAreaPixels(croppedAreaPixels);
-    }, []);
+        setPerImage(prev => {
+            const next = [...prev];
+            next[currentIndex] = { ...next[currentIndex], croppedAreaPixels };
+            return next;
+        });
+    }, [currentIndex]);
 
     const handleDocChange = (e) => {
         const doc = documentTypes.find(d => d.id === e.target.value);
@@ -202,42 +207,48 @@ export default function Editor({ images, onCancel, onOrder }) {
             img.src = url;
         });
 
-    const getCroppedImg = async (imageSrc, pixelCrop, rotation = 0) => {
+    const getCroppedImg = async (imageSrc, pixelCrop, rotation = 0, targetWidth, targetHeight) => {
         const img = await createImage(imageSrc);
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
 
-        const maxSize = Math.max(img.width, img.height);
-        const safeArea = 2 * ((maxSize / 2) * Math.sqrt(2));
+        // 1. Calculate bounding box of rotated image
+        const rotRad = (rotation * Math.PI) / 180;
+        const bBoxWidth = Math.abs(Math.cos(rotRad) * img.width) + Math.abs(Math.sin(rotRad) * img.height);
+        const bBoxHeight = Math.abs(Math.sin(rotRad) * img.width) + Math.abs(Math.cos(rotRad) * img.height);
 
-        canvas.width = safeArea;
-        canvas.height = safeArea;
+        // 2. Draw rotated image
+        canvas.width = bBoxWidth;
+        canvas.height = bBoxHeight;
+        ctx.translate(bBoxWidth / 2, bBoxHeight / 2);
+        ctx.rotate(rotRad);
+        ctx.translate(-img.width / 2, -img.height / 2);
+        ctx.drawImage(img, 0, 0);
 
-        ctx.translate(safeArea / 2, safeArea / 2);
-        ctx.rotate((rotation * Math.PI) / 180);
-        ctx.translate(-safeArea / 2, -safeArea / 2);
+        // 3. Extract the cropped area
+        const croppedCanvas = document.createElement('canvas');
+        const croppedCtx = croppedCanvas.getContext('2d');
 
-        ctx.drawImage(
-            img,
-            safeArea / 2 - img.width * 0.5,
-            safeArea / 2 - img.height * 0.5
-        );
+        // Force dimensions to targetWidth/targetHeight to avoid WebGL tensor caching bugs with different sizes
+        croppedCanvas.width = targetWidth || pixelCrop.width;
+        croppedCanvas.height = targetHeight || pixelCrop.height;
 
-        const data = ctx.getImageData(0, 0, safeArea, safeArea);
-
-        canvas.width = pixelCrop.width;
-        canvas.height = pixelCrop.height;
-
-        ctx.putImageData(
-            data,
-            Math.round(0 - safeArea / 2 + img.width * 0.5 - pixelCrop.x),
-            Math.round(0 - safeArea / 2 + img.height * 0.5 - pixelCrop.y)
+        croppedCtx.drawImage(
+            canvas,
+            pixelCrop.x,
+            pixelCrop.y,
+            pixelCrop.width,
+            pixelCrop.height,
+            0,
+            0,
+            croppedCanvas.width,
+            croppedCanvas.height
         );
 
         return new Promise((resolve) => {
-            canvas.toBlob((file) => {
+            croppedCanvas.toBlob((file) => {
                 resolve(URL.createObjectURL(file));
-            }, 'image/png');
+            }, 'image/jpeg', 1.0);
         });
     };
 
@@ -319,15 +330,89 @@ export default function Editor({ images, onCancel, onOrder }) {
 
                 setProcessingStatus(`Cropping photo ${i + 1} of ${images.length}...`);
 
-                // If user hasn't visited this photo in cropper, compute full-image crop
+                // If user hasn't visited this photo in cropper, compute fallback crop (with face detection!)
                 let cropPixels = imgSettings.croppedAreaPixels;
+                let finalRotation = imgSettings.rotation;
+
                 if (!cropPixels) {
-                    const tempImg = await createImage(imgData);
-                    cropPixels = { x: 0, y: 0, width: tempImg.naturalWidth, height: tempImg.naturalHeight };
+                    setProcessingStatus(`Analyzing photo ${i + 1}...`);
+                    const img = await createImage(imgData);
+                    let nw = img.naturalWidth;
+                    let nh = img.naturalHeight;
+
+                    if (nw > nh * 1.2) {
+                        finalRotation = 90;
+                    }
+
+                    let detectTarget = img;
+                    if (finalRotation === 90) {
+                        const rotCanvas = document.createElement('canvas');
+                        rotCanvas.width = nh;
+                        rotCanvas.height = nw;
+                        const rCtx = rotCanvas.getContext('2d');
+                        rCtx.translate(nh / 2, nw / 2);
+                        rCtx.rotate(Math.PI / 2);
+                        rCtx.drawImage(img, -nw / 2, -nh / 2);
+                        detectTarget = rotCanvas;
+                        nw = detectTarget.width;
+                        nh = detectTarget.height;
+                    }
+
+                    let targetW = nw;
+                    let targetH = nw / aspect;
+
+                    if (targetH > nh) {
+                        targetH = nh;
+                        targetW = nh * aspect;
+                    }
+
+                    cropPixels = {
+                        x: Math.round((nw - targetW) / 2),
+                        y: Math.round((nh - targetH) / 2),
+                        width: Math.round(targetW),
+                        height: Math.round(targetH)
+                    };
+
+                    // Auto face detection for unvisited images
+                    if ('FaceDetector' in window) {
+                        try {
+                            const detector = new window.FaceDetector({ fastMode: true, maxDetectedFaces: 1 });
+                            const faces = await detector.detect(detectTarget);
+                            if (faces.length > 0) {
+                                const face = faces[0].boundingBox;
+                                // face should be ~65% of crop height
+                                targetH = face.height / 0.65;
+                                targetW = targetH * aspect;
+
+                                const faceCenterX = face.x + face.width / 2;
+                                const faceCenterY = face.y + face.height / 2;
+
+                                // Place face slightly above center (40% from top)
+                                let cx = Math.round(faceCenterX - targetW / 2);
+                                let cy = Math.round(faceCenterY - targetH * 0.4);
+
+                                // Ensure we don't go out of bounds too much
+                                // if targetW > nw, we can't completely clamp cx, so we let it center
+                                cx = Math.max(0, Math.min(cx, Math.max(0, nw - targetW)));
+                                cy = Math.max(0, Math.min(cy, Math.max(0, nh - targetH)));
+
+                                cropPixels = { x: cx, y: cy, width: Math.round(targetW), height: Math.round(targetH) };
+                            }
+                        } catch (e) {
+                            console.log('Face detection failed during batch:', e);
+                        }
+                    }
                 }
 
                 // Get raw cropped image (no filters) for better AI detection
-                const croppedUrl = await getCroppedImg(imgData, cropPixels, imgSettings.rotation);
+                const expectedDocWidth = selectedDoc.width || Math.round((selectedDoc.physicalWidth || 35) / 25.4 * 300);
+                const expectedDocHeight = selectedDoc.height || Math.round((selectedDoc.physicalHeight || 45) / 25.4 * 300);
+
+                // Add tiny increment i based on index to bypass @imgly WebGL tensor caching
+                const perturbedWidth = expectedDocWidth + i;
+                const perturbedHeight = expectedDocHeight + i;
+
+                const croppedUrl = await getCroppedImg(imgData, cropPixels, finalRotation, perturbedWidth, perturbedHeight);
 
                 let finalSingle;
 
@@ -335,16 +420,105 @@ export default function Editor({ images, onCancel, onOrder }) {
                     const response = await fetch(croppedUrl);
                     const blob = await response.blob();
 
-                    // Downscale for faster AI processing
-                    const smallBlob = await downscaleForBgRemoval(blob, 1024);
+                    // Convert raw blob into a strongly isolated File with a completely unique name per image
+                    // This explicitly breaks the internal caching mechanism inside @imgly 
+                    // which improperly hashes identical blobs/imageData without names.
+                    const uniqueFile = new File([blob], `input-${i}-${Date.now()}.png`, { type: 'image/png' });
 
                     let removedBgBlob;
 
-                    setProcessingStatus(`Removing background (photo ${i + 1})...`);
-                    removedBgBlob = await removeBackground(smallBlob, {
-                        model: 'medium',
-                        output: { format: 'image/png', quality: 0.8 },
-                    });
+                    if (aiEngine === 'removebg') {
+                        setProcessingStatus(`Removing background (Cloud API) (photo ${i + 1})...`);
+                        const formData = new FormData();
+
+                        // Cloud API handles its own scaling
+                        formData.append('image_file', uniqueFile);
+                        formData.append('size', 'auto');
+
+                        const removeBgResponse = await fetch('https://api.remove.bg/v1.0/removebg', {
+                            method: 'POST',
+                            headers: {
+                                'X-Api-Key': '8Qu6V5HmD5HuKHKoQE7orQvt',
+                            },
+                            body: formData,
+                        });
+
+                        if (!removeBgResponse.ok) {
+                            throw new Error(`Cloud Background Removal failed: ${removeBgResponse.statusText}`);
+                        }
+
+                        removedBgBlob = await removeBgResponse.blob();
+                    } else {
+                        setProcessingStatus(`Loading AI Model (photo ${i + 1})...`);
+                        const { pipeline, env } = await import('@huggingface/transformers');
+
+                        // We do not want to download the model into the browser cache every time, but transformers.js
+                        // does this automatically. Let's configure it safely.
+                        env.allowLocalModels = false;
+
+                        // Load the background removal model (main branch now natively supports ONNX for Transformers.js)
+                        const segmenter = await pipeline('image-segmentation', 'briaai/RMBG-1.4', {
+                            progress_callback: (info) => {
+                                if (info.status === 'progress') {
+                                    setProcessingStatus(`Downloading Model: ${Math.round(info.progress)}%`);
+                                } else if (info.status === 'ready') {
+                                    setProcessingStatus(`Model Loaded. Segmenting (photo ${i + 1})...`);
+                                }
+                            }
+                        });
+
+                        // Process the image. We can pass the URL directly.
+                        setProcessingStatus(`Segmenting (photo ${i + 1})...`);
+                        const output = await segmenter(croppedUrl);
+
+                        // For RMBG-1.4, the output is an array of masks or a single object. 
+                        // Usually it returns a RawImage mask. In transformers.js for briaai:
+                        // output can be a direct mask. We need to apply this mask to the original image.
+                        // Actually, transformers.js image-segmentation pipeline returns an array of { label, mask: RawImage }.
+                        // But wait! Many times it just returns the foreground as an image buffer or a blob.
+                        // Wait, no. Transformers docs say: return object with `mask` (RawImage).
+
+                        const maskImage = Array.isArray(output) ? output[0].mask : output.mask;
+
+                        // Convert RawImage to a canvas to combine with original
+                        const maskCanvas = document.createElement('canvas');
+                        maskCanvas.width = maskImage.width;
+                        maskCanvas.height = maskImage.height;
+                        const maskCtx = maskCanvas.getContext('2d');
+                        // Convert the 1-channel (grayscale) tensor from RMBG to a 4-channel RGBA array for Canvas
+                        const maskDataRaw = maskImage.data;
+                        console.log('TRANSFORMERS.JS MASK:', { w: maskImage.width, h: maskImage.height, len: maskDataRaw.length });
+                        const rgbaData = new Uint8ClampedArray(maskImage.width * maskImage.height * 4);
+                        for (let j = 0; j < maskDataRaw.length; ++j) {
+                            rgbaData[j * 4 + 0] = 0; // R (Doesn't matter for destination-in, only Alpha matters)
+                            rgbaData[j * 4 + 1] = 0; // G
+                            rgbaData[j * 4 + 2] = 0; // B
+                            rgbaData[j * 4 + 3] = maskDataRaw[j]; // A (Grayscale intensity becomes Alpha transparency)
+                        }
+
+                        const maskData = new ImageData(rgbaData, maskImage.width, maskImage.height);
+                        maskCtx.putImageData(maskData, 0, 0);
+
+                        // Load original image into canvas
+                        const imgEl = new Image();
+                        imgEl.src = croppedUrl;
+                        await new Promise(r => { imgEl.onload = r; });
+
+                        const finalCanvas = document.createElement('canvas');
+                        finalCanvas.width = imgEl.width;
+                        finalCanvas.height = imgEl.height;
+                        const finalCtx = finalCanvas.getContext('2d');
+
+                        // Draw original image
+                        finalCtx.drawImage(imgEl, 0, 0);
+
+                        // Apply the mask
+                        finalCtx.globalCompositeOperation = 'destination-in';
+                        finalCtx.drawImage(maskCanvas, 0, 0, imgEl.width, imgEl.height);
+
+                        // Convert back to blob
+                        removedBgBlob = await new Promise(r => finalCanvas.toBlob(r, 'image/png', 1.0));
+                    }
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
                     setProcessingStatus(`Applying adjustments (photo ${i + 1})...`);
@@ -450,16 +624,20 @@ export default function Editor({ images, onCancel, onOrder }) {
     };
 
     const handleAutoFill = () => {
-        // Auto-fill remaining slots with the FIRST image (or currently "selected" concept if we had one)
-        // Or distribute evenly? 
-        // Strategy: Fill remainder with the first image for now, or the image with > 0 count.
+        // Auto-fill remaining slots distributed evenly across all images
         const currentTotal = printCounts.reduce((a, b) => a + b, 0);
         const remaining = maxSlots - currentTotal;
 
         if (remaining > 0) {
             const newCounts = [...printCounts];
-            // Add to the first image
-            newCounts[0] += remaining;
+
+            // Distribute remaining slots evenly across all images
+            let currIdx = 0;
+            for (let r = 0; r < remaining; r++) {
+                newCounts[currIdx % newCounts.length] += 1;
+                currIdx++;
+            }
+
             setPrintCounts(newCounts);
             regenerateSheet(newCounts);
         }
@@ -959,11 +1137,36 @@ export default function Editor({ images, onCancel, onOrder }) {
                                 >
                                     <img src={img} alt={`Photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     <span style={{
-                                        position: 'absolute', bottom: 1, right: 1,
+                                        position: 'absolute', bottom: 1, left: 1, // moved from right:1 to left:1 for layout
                                         background: i === currentIndex ? '#2563EB' : 'rgba(0,0,0,0.5)',
                                         color: '#fff', fontSize: 9, fontWeight: 800,
                                         padding: '0 4px', borderRadius: 3, lineHeight: '14px'
                                     }}>{i + 1}</span>
+
+                                    <div
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            if (images.length === 1) {
+                                                onCancel();
+                                            } else {
+                                                if (currentIndex === i && i === images.length - 1) {
+                                                    setCurrentIndex(i - 1);
+                                                } else if (currentIndex > i) {
+                                                    setCurrentIndex(currentIndex - 1);
+                                                }
+                                                onRemoveImage(i);
+                                            }
+                                        }}
+                                        style={{
+                                            position: 'absolute', top: 0, right: 0,
+                                            width: 14, height: 14, background: 'rgba(220, 38, 38, 0.9)',
+                                            color: '#fff', fontSize: 9, fontWeight: 800,
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            borderBottomLeftRadius: 4, cursor: 'pointer', zIndex: 5
+                                        }}
+                                    >
+                                        ✕
+                                    </div>
                                 </button>
                             ))}
                         </div>
@@ -1011,22 +1214,119 @@ export default function Editor({ images, onCancel, onOrder }) {
                     {/* Processing Overlay */}
                     {isProcessing && (
                         <div style={{
-                            position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.9)',
+                            position: 'absolute', inset: 0,
+                            background: 'linear-gradient(135deg, rgba(239,246,255,0.97) 0%, rgba(255,255,255,0.98) 50%, rgba(243,232,255,0.97) 100%)',
                             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-                            zIndex: 20, borderRadius: 16
+                            zIndex: 20, borderRadius: 16, overflow: 'hidden',
+                            backdropFilter: 'blur(8px)'
                         }}>
+                            {/* Animated background blobs */}
                             <div style={{
-                                width: 48, height: 48, border: '4px solid #E2E8F0',
-                                borderTopColor: '#2563EB', borderRadius: '50%',
-                                animation: 'spin 1s linear infinite'
+                                position: 'absolute', width: 200, height: 200, borderRadius: '50%',
+                                background: 'radial-gradient(circle, rgba(37,99,235,0.12) 0%, transparent 70%)',
+                                top: '20%', left: '15%',
+                                animation: 'blobFloat1 4s ease-in-out infinite'
                             }}></div>
-                            <p style={{ marginTop: 20, fontSize: 15, fontWeight: 600, color: '#0F172A' }}>
+                            <div style={{
+                                position: 'absolute', width: 160, height: 160, borderRadius: '50%',
+                                background: 'radial-gradient(circle, rgba(139,92,246,0.10) 0%, transparent 70%)',
+                                bottom: '15%', right: '10%',
+                                animation: 'blobFloat2 5s ease-in-out infinite'
+                            }}></div>
+
+                            {/* Outer pulsing ring */}
+                            <div style={{
+                                position: 'relative', width: 96, height: 96,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                <div style={{
+                                    position: 'absolute', inset: 0, borderRadius: '50%',
+                                    border: '3px solid rgba(37,99,235,0.15)',
+                                    animation: 'pulseRing 2s ease-in-out infinite'
+                                }}></div>
+                                <div style={{
+                                    position: 'absolute', inset: 6, borderRadius: '50%',
+                                    border: '3px solid transparent',
+                                    borderTopColor: '#2563EB', borderRightColor: '#8B5CF6',
+                                    animation: 'spin 1.2s linear infinite'
+                                }}></div>
+                                <div style={{
+                                    position: 'absolute', inset: 14, borderRadius: '50%',
+                                    border: '2px solid transparent',
+                                    borderBottomColor: '#60A5FA', borderLeftColor: '#A78BFA',
+                                    animation: 'spinReverse 1.8s linear infinite'
+                                }}></div>
+                                {/* Center icon */}
+                                <div style={{
+                                    width: 40, height: 40, borderRadius: '50%',
+                                    background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 4px 20px rgba(37,99,235,0.3)',
+                                    animation: 'centerPulse 2s ease-in-out infinite'
+                                }}>
+                                    <Sparkles style={{ width: 20, height: 20, color: '#fff' }} />
+                                </div>
+                            </div>
+
+                            {/* Status text */}
+                            <p style={{
+                                marginTop: 24, fontSize: 16, fontWeight: 700, color: '#0F172A',
+                                letterSpacing: '-0.01em',
+                                animation: 'fadeSlideUp 0.4s ease-out'
+                            }}>
                                 {processingStatus || 'Processing...'}
                             </p>
-                            <p style={{ marginTop: 8, fontSize: 13, color: '#94A3B8' }}>
-                                This may take 10-15 seconds for background removal
+
+                            {/* Bouncing dots */}
+                            <div style={{ display: 'flex', gap: 6, marginTop: 14 }}>
+                                {[0, 1, 2].map(i => (
+                                    <div key={i} style={{
+                                        width: 8, height: 8, borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #2563EB, #7C3AED)',
+                                        animation: `bounceDot 1.4s ease-in-out ${i * 0.16}s infinite`
+                                    }}></div>
+                                ))}
+                            </div>
+
+                            {/* Subtitle */}
+                            <p style={{
+                                marginTop: 16, fontSize: 13, color: '#94A3B8', fontWeight: 500,
+                                display: 'flex', alignItems: 'center', gap: 6
+                            }}>
+                                <Lock style={{ width: 13, height: 13 }} />
+                                AI processing securely on device
                             </p>
-                            <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+                            <style>{`
+                                @keyframes spin { to { transform: rotate(360deg); } }
+                                @keyframes spinReverse { to { transform: rotate(-360deg); } }
+                                @keyframes pulseRing {
+                                    0%, 100% { transform: scale(1); opacity: 0.5; }
+                                    50% { transform: scale(1.12); opacity: 1; }
+                                }
+                                @keyframes centerPulse {
+                                    0%, 100% { transform: scale(1); box-shadow: 0 4px 20px rgba(37,99,235,0.3); }
+                                    50% { transform: scale(1.08); box-shadow: 0 6px 28px rgba(37,99,235,0.45); }
+                                }
+                                @keyframes bounceDot {
+                                    0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+                                    40% { transform: translateY(-10px); opacity: 1; }
+                                }
+                                @keyframes blobFloat1 {
+                                    0%, 100% { transform: translate(0, 0) scale(1); }
+                                    33% { transform: translate(30px, -20px) scale(1.1); }
+                                    66% { transform: translate(-15px, 15px) scale(0.95); }
+                                }
+                                @keyframes blobFloat2 {
+                                    0%, 100% { transform: translate(0, 0) scale(1); }
+                                    33% { transform: translate(-25px, 20px) scale(1.05); }
+                                    66% { transform: translate(20px, -10px) scale(1.1); }
+                                }
+                                @keyframes fadeSlideUp {
+                                    from { opacity: 0; transform: translateY(8px); }
+                                    to { opacity: 1; transform: translateY(0); }
+                                }
+                            `}</style>
                         </div>
                     )}
 
@@ -1138,9 +1438,49 @@ export default function Editor({ images, onCancel, onOrder }) {
                             </div>
 
                             {/* AI Engine Selector */}
+                            {bgRemoval && (
+                                <div style={{
+                                    padding: 14, borderRadius: 12, border: '1px solid #E2E8F0', background: '#fff', marginBottom: 12,
+                                    animation: 'fadeIn 0.3s ease'
+                                }}>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 10 }}>Processing Engine</p>
+                                    <div style={{ display: 'flex', gap: 8 }}>
+                                        <button
+                                            onClick={() => setAiEngine('imgly')}
+                                            style={{
+                                                flex: 1, padding: '10px 8px', borderRadius: 8,
+                                                border: aiEngine === 'imgly' ? '2px solid #2563EB' : '1px solid #E2E8F0',
+                                                background: aiEngine === 'imgly' ? '#EFF6FF' : '#fff',
+                                                color: aiEngine === 'imgly' ? '#2563EB' : '#475569',
+                                                fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4
+                                            }}
+                                        >
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <Smartphone style={{ width: 14, height: 14 }} /> On-Device
+                                            </span>
+                                            <span style={{ fontSize: 10, opacity: 0.7, fontWeight: 500 }}>Slower, private</span>
+                                        </button>
 
-
-                            {/* Background Color Picker */}
+                                        <button
+                                            onClick={() => setAiEngine('removebg')}
+                                            style={{
+                                                flex: 1, padding: '10px 8px', borderRadius: 8,
+                                                border: aiEngine === 'removebg' ? '2px solid #8B5CF6' : '1px solid #E2E8F0',
+                                                background: aiEngine === 'removebg' ? '#F5F3FF' : '#fff',
+                                                color: aiEngine === 'removebg' ? '#7C3AED' : '#475569',
+                                                fontSize: 12, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+                                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4
+                                            }}
+                                        >
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                <Cloud style={{ width: 14, height: 14 }} /> Cloud API
+                                            </span>
+                                            <span style={{ fontSize: 10, opacity: 0.7, fontWeight: 500 }}>Fast, high quality</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                             {bgRemoval && (
                                 <div style={{
                                     padding: 16, borderRadius: 12, border: '1px solid #E2E8F0',
