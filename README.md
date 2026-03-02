@@ -45,3 +45,9 @@ npm i -g vercel
 vercel
 vercel --prod
 ```
+
+## License
+
+This project is proprietary and not open source.
+
+See [LICENSE](LICENSE) for full terms.
