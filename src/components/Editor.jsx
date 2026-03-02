@@ -1077,31 +1077,26 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                     </button>
                                 </div>
 
-                                {/* Direct Print Buttons */}
+                                {/* Direct Print Button */}
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
-                                    {PAGE_SIZES.map(ps => (
-                                        <button
-                                            key={ps.id}
-                                            onClick={() => printSheet(ps)}
-                                            disabled={!result.sheets[ps.id]}
-                                            style={{
-                                                flex: 1, minWidth: 140,
-                                                background: result.sheets[ps.id] ? 'linear-gradient(135deg, #059669, #10B981)' : 'var(--bg-tertiary)',
-                                                color: result.sheets[ps.id] ? '#fff' : 'var(--text-disabled)',
-                                                border: 'none',
-                                                padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
-                                                cursor: result.sheets[ps.id] ? 'pointer' : 'not-allowed',
-                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                                                whiteSpace: 'nowrap',
-                                                boxShadow: result.sheets[ps.id] ? '0 4px 12px rgba(5,150,105,0.25)' : 'none',
-                                                transition: 'all 0.2s',
-                                                opacity: result.sheets[ps.id] ? 1 : 0.5
-                                            }}
-                                        >
-                                            <Printer style={{ width: 16, height: 16 }} />
-                                            Print {ps.label} Sheet
-                                        </button>
-                                    ))}
+                                    <button
+                                        onClick={() => printSheet(activePageSize)}
+                                        style={{
+                                            flex: 1, minWidth: 160,
+                                            background: 'linear-gradient(135deg, #059669, #10B981)',
+                                            color: '#fff',
+                                            border: 'none',
+                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                            cursor: 'pointer',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                            whiteSpace: 'nowrap',
+                                            boxShadow: '0 4px 12px rgba(5,150,105,0.25)',
+                                            transition: 'all 0.2s'
+                                        }}
+                                    >
+                                        <Printer style={{ width: 16, height: 16 }} />
+                                        Print {activePageSize.label} Sheet
+                                    </button>
                                 </div>
 
                                 {/* Trust Badges */}
@@ -1331,21 +1326,21 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         {/* Guide Labels */}
                         <div style={{
                             position: 'absolute', top: '10%', left: 12, zIndex: 5,
-                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
+                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)',
                             textTransform: 'uppercase', letterSpacing: '0.1em',
-                            background: 'rgba(0,0,0,0.35)', padding: '3px 8px', borderRadius: 4
+                            background: 'rgba(15, 23, 42, 0.6)', padding: '3px 8px', borderRadius: 4
                         }}>Crown of Head</div>
                         <div style={{
                             position: 'absolute', top: '45%', left: 12, zIndex: 5,
-                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
+                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)',
                             textTransform: 'uppercase', letterSpacing: '0.1em',
-                            background: 'rgba(0,0,0,0.35)', padding: '3px 8px', borderRadius: 4
+                            background: 'rgba(15, 23, 42, 0.6)', padding: '3px 8px', borderRadius: 4
                         }}>Eye Level</div>
                         <div style={{
                             position: 'absolute', bottom: '15%', left: 12, zIndex: 5,
-                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.7)',
+                            fontSize: 10, fontWeight: 600, color: 'rgba(255,255,255,0.85)',
                             textTransform: 'uppercase', letterSpacing: '0.1em',
-                            background: 'rgba(0,0,0,0.35)', padding: '3px 8px', borderRadius: 4
+                            background: 'rgba(15, 23, 42, 0.6)', padding: '3px 8px', borderRadius: 4
                         }}>Chin Line</div>
                     </div>
 
@@ -1559,7 +1554,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             </div>
 
                             <div style={{
-                                padding: 14, borderRadius: 12, border: '1px solid var(--border-light)', background: '#0D0D14', marginBottom: 12
+                                padding: 14, borderRadius: 12, border: '1px solid var(--border-light)', background: 'var(--bg-primary)', marginBottom: 12
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
@@ -1622,7 +1617,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             {bgRemoval && (
                                 <div style={{
                                     padding: 16, borderRadius: 12, border: '1px solid var(--border-light)',
-                                    background: '#0D0D14', animation: 'fadeIn 0.3s ease'
+                                    background: 'var(--bg-primary)', animation: 'fadeIn 0.3s ease'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                                         <Palette style={{ width: 16, height: 16, color: 'var(--text-muted-dark)' }} />
@@ -1732,7 +1727,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     </div>
 
                     {/* Generate Button */}
-                    <div style={{ padding: 20, borderTop: '1px solid var(--border-light)', background: '#0D0D14' }}>
+                    <div style={{ padding: 20, borderTop: '1px solid var(--border-light)', background: 'var(--bg-primary)' }}>
                         <button
                             onClick={handleProcess}
                             disabled={isProcessing}

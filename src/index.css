@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 :root {
-  --bg-primary: #05050A;
-  --bg-secondary: #111118;
-  --bg-tertiary: #1A1A24;
+  --bg-primary: #0A0E1A;
+  --bg-secondary: #101729;
+  --bg-tertiary: #182038;
   --bg-accent-dark: #0F172A;
 
   --text-primary: #F9FAFB;
@@ -13,9 +13,9 @@
   --text-muted-dark: #9CA3AF;
   --text-disabled: #6B7280;
 
-  --border-light: #1F2937;
-  --border-dark: #111827;
-  --border-color: #27273A;
+  --border-light: #1E2D4A;
+  --border-dark: #121D36;
+  --border-color: #243352;
 
   --primary: #3B82F6;
   --primary-light: #60A5FA;
@@ -32,11 +32,11 @@
   --orange-500: #F97316;
   --orange-50: rgba(249, 115, 22, 0.1);
 
-  --slate-50: #05050A;
-  --slate-100: #111118;
-  --slate-200: #1A1A24;
-  --slate-300: #27273A;
-  --slate-400: #374151;
+  --slate-50: #0A0E1A;
+  --slate-100: #101729;
+  --slate-200: #182038;
+  --slate-300: #243352;
+  --slate-400: #2E4068;
   --slate-500: #6B7280;
   --slate-600: #9CA3AF;
   --slate-700: #D1D5DB;
@@ -311,7 +311,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .editor-canvas {
   flex: 1;
-  background: #F8FAFC;
+  background: var(--bg-secondary);
   display: flex;
   flex-direction: column;
   position: relative;
@@ -319,11 +319,19 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 .editor-sidebar {
   width: 360px;
-  background: #fff;
-  border-left: 1px solid #E2E8F0;
+  background: var(--bg-primary);
+  border-left: 1px solid var(--border-light);
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+
+/* Override react-easy-crop black backgrounds to midnight blue */
+.reactEasyCrop_Container {
+  background: #0B1224 !important;
+}
+.reactEasyCrop_CropArea {
+  border-color: rgba(99, 155, 255, 0.5) !important;
 }
 
 /* Result view layout */
@@ -412,7 +420,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   .editor-sidebar {
     width: 100%;
     border-left: none;
-    border-top: 1px solid #E2E8F0;
+    border-top: 1px solid var(--border-light);
   }
 
   .result-content {
