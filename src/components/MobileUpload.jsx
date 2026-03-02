@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
-import { Camera, Upload, CheckCircle, Smartphone, ImagePlus, X, Wifi, WifiOff } from 'lucide-react';
+import { Camera, Upload, CheckCircle, Smartphone, ImagePlus, X, Wifi, WifiOff, Image } from 'lucide-react';
 
 const MAX_DIM = 2048; // Max dimension to resize to before sending
 
@@ -32,7 +32,6 @@ export default function MobileUpload({ peerId }) {
     const [sendingFile, setSendingFile] = useState(false);
     const [previews, setPreviews] = useState([]);
     const connRef = useRef(null);
-    const fileInputRef = useRef(null);
     const galleryInputRef = useRef(null);
 
     useEffect(() => {
@@ -155,7 +154,7 @@ export default function MobileUpload({ peerId }) {
                     Upload Photos
                 </h1>
                 <p style={{ fontSize: 13, color: 'var(--text-muted-dark)', marginBottom: 24, lineHeight: 1.6 }}>
-                    Take or select photos to send directly to your desktop
+                    Select photos from your gallery to send directly to your desktop
                 </p>
 
                 {/* Connecting state */}
@@ -205,16 +204,7 @@ export default function MobileUpload({ peerId }) {
                 {/* Connected — upload buttons */}
                 {isConnected && (
                     <>
-                        {/* Hidden inputs */}
-                        <input
-                            ref={fileInputRef}
-                            type="file"
-                            accept="image/*"
-                            capture="environment"
-                            multiple
-                            onChange={handleFileSelect}
-                            style={{ display: 'none' }}
-                        />
+                        {/* Hidden input */}
                         <input
                             ref={galleryInputRef}
                             type="file"
@@ -224,40 +214,21 @@ export default function MobileUpload({ peerId }) {
                             style={{ display: 'none' }}
                         />
 
-                        {/* Take Photo button */}
+                        {/* Choose from Gallery button */}
                         <button
-                            onClick={() => fileInputRef.current?.click()}
+                            onClick={() => galleryInputRef.current?.click()}
                             disabled={sendingFile}
                             style={{
                                 width: '100%', background: '#2563EB', color: '#fff', border: 'none',
                                 padding: '15px 24px', borderRadius: 14, fontWeight: 700, fontSize: 15,
                                 cursor: sendingFile ? 'wait' : 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)', marginBottom: 10,
+                                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)',
                                 opacity: sendingFile ? 0.7 : 1, transition: 'opacity 0.2s'
                             }}
                         >
-                            <Camera style={{ width: 19, height: 19 }} />
-                            {sendingFile ? 'Sending...' : 'Take Photo'}
-                        </button>
-
-                        {/* Gallery button */}
-                        <button
-                            onClick={() => galleryInputRef.current?.click()}
-                            disabled={sendingFile}
-                            style={{
-                                width: '100%',
-                                background: 'var(--bg-primary)',
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border-light)',
-                                padding: '15px 24px', borderRadius: 14, fontWeight: 700, fontSize: 15,
-                                cursor: sendingFile ? 'wait' : 'pointer',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                opacity: sendingFile ? 0.7 : 1, transition: 'opacity 0.2s'
-                            }}
-                        >
-                            <Upload style={{ width: 19, height: 19 }} />
-                            Choose from Gallery
+                            <Image style={{ width: 19, height: 19 }} />
+                            {sendingFile ? 'Sending...' : 'Choose from Gallery'}
                         </button>
 
                         {/* Sent previews */}

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import Peer from 'peerjs';
-import { Smartphone, X, CheckCircle, Wifi, WifiOff, Camera, Copy, Check, QrCode } from 'lucide-react';
+import { Smartphone, X, CheckCircle, Wifi, WifiOff, Camera, Copy, Check, QrCode, Upload } from 'lucide-react';
 
 export default function QRUploadModal({ onReceive, onClose }) {
     const [peerId, setPeerId] = useState(null);
@@ -121,7 +121,7 @@ export default function QRUploadModal({ onReceive, onClose }) {
 
                 {/* QR Code area */}
                 {status === 'generating' && (
-                    <div style={{
+                    <div className="qr-placeholder-box" style={{
                         width: 220, height: 220, margin: '0 auto 20px',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         background: 'var(--bg-secondary)', borderRadius: 20,
@@ -136,7 +136,7 @@ export default function QRUploadModal({ onReceive, onClose }) {
                 )}
 
                 {status === 'error' && (
-                    <div style={{
+                    <div className="qr-placeholder-box" style={{
                         width: 220, height: 220, margin: '0 auto 20px',
                         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
                         background: 'var(--bg-secondary)', borderRadius: 20, gap: 12,
@@ -162,7 +162,7 @@ export default function QRUploadModal({ onReceive, onClose }) {
                 )}
 
                 {uploadUrl && status !== 'error' && (
-                    <div style={{
+                    <div className="qr-code-wrapper" style={{
                         display: 'inline-block', padding: 14, borderRadius: 20,
                         marginBottom: 20, position: 'relative',
                         background: '#FFFFFF',
@@ -175,6 +175,7 @@ export default function QRUploadModal({ onReceive, onClose }) {
                             includeMargin={false}
                             bgColor="#FFFFFF"
                             fgColor="#0F172A"
+                            className="qr-svg"
                         />
                         {/* Center camera icon */}
                         <div style={{
@@ -267,12 +268,13 @@ export default function QRUploadModal({ onReceive, onClose }) {
                 </div>
 
                 {/* Steps guide */}
-                <div style={{
-                    display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16
+                <div className="qr-steps-row" style={{
+                    display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16,
+                    flexWrap: 'wrap'
                 }}>
                     {[
                         { icon: <QrCode style={{ width: 13, height: 13 }} />, text: 'Scan QR' },
-                        { icon: <Camera style={{ width: 13, height: 13 }} />, text: 'Take Photo' },
+                        { icon: <Upload style={{ width: 13, height: 13 }} />, text: 'Select Photo' },
                         { icon: <CheckCircle style={{ width: 13, height: 13 }} />, text: 'Auto-Sent' }
                     ].map((step, i) => (
                         <div key={i} style={{
@@ -314,10 +316,51 @@ export default function QRUploadModal({ onReceive, onClose }) {
                     border: 1px solid var(--border-light);
                 }
                 @media (max-width: 480px) {
+                    .qr-modal-overlay {
+                        padding: 12px !important;
+                        align-items: flex-start !important;
+                        padding-top: 40px !important;
+                    }
                     .qr-modal-card {
-                        padding: 28px 20px 22px !important;
+                        padding: 24px 18px 20px !important;
                         border-radius: 22px !important;
-                        margin: 8px;
+                        margin: 0 !important;
+                        max-height: calc(100vh - 80px);
+                        overflow-y: auto;
+                        -webkit-overflow-scrolling: touch;
+                    }
+                    .qr-modal-card h2 {
+                        font-size: 18px !important;
+                    }
+                    .qr-modal-card .qr-steps-row {
+                        gap: 6px !important;
+                    }
+                    .qr-modal-card .qr-steps-row > div {
+                        padding: 4px 8px !important;
+                    }
+                    .qr-placeholder-box {
+                        width: 190px !important;
+                        height: 190px !important;
+                    }
+                    .qr-code-wrapper {
+                        padding: 12px !important;
+                    }
+                    .qr-svg {
+                        width: 170px !important;
+                        height: 170px !important;
+                    }
+                }
+                @media (max-width: 380px) {
+                    .qr-modal-card {
+                        padding: 20px 14px 16px !important;
+                    }
+                    .qr-code-wrapper {
+                        padding: 10px !important;
+                        border-radius: 16px !important;
+                    }
+                    .qr-svg {
+                        width: 160px !important;
+                        height: 160px !important;
                     }
                 }
             `}</style>
