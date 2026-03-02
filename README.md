@@ -1,16 +1,30 @@
-# React + Vite
+# Ready To Print
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Ready To Print helps users prepare photos that are ready for printing.
 
-Currently, two official plugins are available:
+## What it does
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Upload photos
+- Adjust and prepare photos for print
+- Export print-ready output
 
-## React Compiler
+## How to use
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Open the app.
+2. Upload your photo.
+3. Follow the on-screen steps to prepare it for printing.
+4. Export or download the final result.
 
-## Expanding the ESLint configuration
+## Deploy
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+This project is configured for deployment on Vercel.
+
+1. Push this repository to GitHub.
+2. Import it into Vercel.
+3. Click deploy.
+
+## License
+
+This project is proprietary and not open source.
+
+See [LICENSE](LICENSE) for full terms.
