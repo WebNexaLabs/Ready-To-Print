@@ -10,9 +10,14 @@ import OrderPrints from './components/OrderPrints';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import GlobalModals from './components/GlobalModals';
+import QRUploadModal from './components/QRUploadModal';
+import MobileUpload from './components/MobileUpload';
 
 import Header from './components/Header';
 import { documentTypes } from './data/countries';
+
+// Detect if this is a mobile upload session (opened via QR code)
+const uploadPeerId = new URLSearchParams(window.location.search).get('upload');
 
 function App() {
   const [images, setImages] = useState([]);
@@ -21,8 +26,14 @@ function App() {
   const [showRefund, setShowRefund] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
+  const [showQR, setShowQR] = useState(false);
   const [orderImage, setOrderImage] = useState(null);
   const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
+
+  // If opened via QR code on phone, render mobile upload page
+  if (uploadPeerId) {
+    return <MobileUpload peerId={uploadPeerId} />;
+  }
 
   const handleUpload = (imageDataUrls) => {
     setImages(imageDataUrls);
@@ -169,7 +180,7 @@ function App() {
               background: 'var(--bg-primary)', padding: 8, borderRadius: 24,
               boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid var(--border-dark)'
             }}>
-              <UploadSection onUpload={handleUpload} />
+              <UploadSection onUpload={handleUpload} onShowQR={() => setShowQR(true)} />
             </div>
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 20, opacity: 0.7 }}>
@@ -422,6 +433,19 @@ function App() {
           </div>
         </div>
       </footer>
+
+      {/* QR Upload Modal */}
+      {showQR && (
+        <QRUploadModal
+          onReceive={(dataUrl) => {
+            setImages(prev => [...prev, dataUrl]);
+          }}
+          onClose={() => {
+            setShowQR(false);
+            // If images were received via QR, they're already in state
+          }}
+        />
+      )}
 
       {/* Global Modals for Privacy, Refund, and Support */}
       <GlobalModals

@@ -1,9 +1,9 @@
 import { useState, useRef } from 'react';
-import { Upload, Camera, X, ImagePlus } from 'lucide-react';
+import { Upload, Camera, X, ImagePlus, Smartphone } from 'lucide-react';
 
 const MAX_PHOTOS = 7;
 
-export default function UploadSection({ onUpload }) {
+export default function UploadSection({ onUpload, onShowQR }) {
     const [isDragging, setIsDragging] = useState(false);
     const [images, setImages] = useState([]);
     const fileInputRef = useRef(null);
@@ -118,6 +118,34 @@ export default function UploadSection({ onUpload }) {
                         }}>{fmt}</span>
                     ))}
                 </div>
+
+                {/* OR divider */}
+                {onShowQR && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 18, width: '100%', maxWidth: 280 }}>
+                        <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-disabled)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>or</span>
+                        <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
+                    </div>
+                )}
+
+                {/* Upload from Phone button */}
+                {onShowQR && (
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onShowQR(); }}
+                        style={{
+                            marginTop: 12, background: 'transparent', color: '#2563EB',
+                            border: '1.5px solid #2563EB', padding: '9px 24px', borderRadius: 999,
+                            fontWeight: 600, fontSize: 13, cursor: 'pointer',
+                            display: 'flex', alignItems: 'center', gap: 8,
+                            transition: 'all 0.2s'
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.08)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                    >
+                        <Smartphone style={{ width: 15, height: 15 }} />
+                        Upload from Phone
+                    </button>
+                )}
             </div>
 
             {/* Image Preview Grid */}
