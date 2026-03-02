@@ -745,6 +745,35 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
         pdf.save(filename);
     };
 
+    const printSheet = (pageSize) => {
+        const sheetUrl = result?.sheets?.[pageSize.id];
+        if (!sheetUrl) return;
+
+        const widthMm = Math.round(pageSize.widthInch * 25.4);
+        const heightMm = Math.round(pageSize.heightInch * 25.4);
+
+        const printWindow = window.open('', '_blank', 'width=900,height=700');
+        if (!printWindow) return;
+
+        printWindow.document.write(`<!DOCTYPE html>
+<html><head><title>Print ${pageSize.label} Sheet</title>
+<style>
+  @page { size: ${widthMm}mm ${heightMm}mm; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: ${widthMm}mm; height: ${heightMm}mm; }
+  body { display: flex; align-items: center; justify-content: center; background: #fff; }
+  img { width: 100%; height: 100%; object-fit: contain; }
+  @media screen {
+    html, body { width: 100vw; height: 100vh; }
+    body { padding: 20px; }
+    img { max-width: 100%; max-height: 100%; width: auto; height: auto; }
+  }
+</style></head><body>
+<img src="${sheetUrl}" onload="setTimeout(()=>{window.print();},300)" />
+</body></html>`);
+        printWindow.document.close();
+    };
+
     // ======= RESULT VIEW (Image 3) =======
     if (result) {
         return (
@@ -1046,6 +1075,33 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                     >
                                         <Printer style={{ width: 16, height: 16 }} /> Order Prints (₹{activePageSize.id === '4x6' ? 64 : 99})
                                     </button>
+                                </div>
+
+                                {/* Direct Print Buttons */}
+                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                    {PAGE_SIZES.map(ps => (
+                                        <button
+                                            key={ps.id}
+                                            onClick={() => printSheet(ps)}
+                                            disabled={!result.sheets[ps.id]}
+                                            style={{
+                                                flex: 1, minWidth: 140,
+                                                background: result.sheets[ps.id] ? 'linear-gradient(135deg, #059669, #10B981)' : 'var(--bg-tertiary)',
+                                                color: result.sheets[ps.id] ? '#fff' : 'var(--text-disabled)',
+                                                border: 'none',
+                                                padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
+                                                cursor: result.sheets[ps.id] ? 'pointer' : 'not-allowed',
+                                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                                                whiteSpace: 'nowrap',
+                                                boxShadow: result.sheets[ps.id] ? '0 4px 12px rgba(5,150,105,0.25)' : 'none',
+                                                transition: 'all 0.2s',
+                                                opacity: result.sheets[ps.id] ? 1 : 0.5
+                                            }}
+                                        >
+                                            <Printer style={{ width: 16, height: 16 }} />
+                                            Print {ps.label} Sheet
+                                        </button>
+                                    ))}
                                 </div>
 
                                 {/* Trust Badges */}
