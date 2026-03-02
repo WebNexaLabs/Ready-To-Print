@@ -4,7 +4,6 @@ import { ShieldCheck, ArrowRight, CheckCircle, Smartphone, Mail, Lock, BadgeChec
 
 const GlobalModals = ({
     showPrivacy, setShowPrivacy,
-    showRefund, setShowRefund,
     showSupport, setShowSupport,
     showSubscription, setShowSubscription
 }) => {
@@ -56,85 +55,6 @@ const GlobalModals = ({
 
                         <button
                             onClick={() => setShowPrivacy(false)}
-                            style={{
-                                marginTop: 32, width: '100%', background: 'var(--bg-accent-dark)', color: '#fff', border: 'none',
-                                padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'
-                            }}
-                        >
-                            Close
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {/* Refund Policy Modal */}
-            {showRefund && (
-                <div style={{
-                    position: 'fixed', inset: 0, zIndex: 100,
-                    background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20
-                }} onClick={() => setShowRefund(false)}>
-                    <div style={{
-                        background: 'var(--bg-primary)', borderRadius: 24, padding: 40, maxWidth: 600, width: '100%',
-                        position: 'relative', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', maxHeight: '90vh', overflowY: 'auto'
-                    }} onClick={e => e.stopPropagation()} className="modal-content">
-                        <button
-                            onClick={() => setShowRefund(false)}
-                            style={{
-                                position: 'absolute', top: 24, right: 24, background: 'var(--bg-tertiary)', border: 'none',
-                                width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                cursor: 'pointer', color: 'var(--text-muted-dark)'
-                            }}
-                        >
-                            <ArrowRight style={{ width: 18, height: 18, transform: 'rotate(45deg)' }} />
-                        </button>
-
-                        <h2 style={{ fontSize: 24, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>Refund Policy</h2>
-                        <p style={{ fontSize: 15, color: 'var(--text-muted-dark)', marginBottom: 24 }}>At SelfieSePassport, customer satisfaction is our priority.</p>
-
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-
-                            {/* Eligibility */}
-                            <div>
-                                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span>✅</span> Eligibility for Refund
-                                </h3>
-                                <p style={{ fontSize: 14, color: 'var(--text-tertiary)', marginBottom: 8 }}>You are eligible for a full refund if:</p>
-                                <ul style={{ paddingLeft: 20, fontSize: 14, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                    <li>Your generated passport photo is rejected due to non-compliance with official size or background standards.</li>
-                                    <li>There is a technical error in processing your photo.</li>
-                                </ul>
-                            </div>
-
-                            {/* Non-Refundable */}
-                            <div>
-                                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span>❌</span> Non-Refundable Cases
-                                </h3>
-                                <p style={{ fontSize: 14, color: 'var(--text-tertiary)', marginBottom: 8 }}>Refunds will not be issued if:</p>
-                                <ul style={{ paddingLeft: 20, fontSize: 14, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                    <li>The uploaded photo does not follow the provided Photo Guidelines.</li>
-                                    <li>The rejection is due to incorrect user-uploaded image (blur, wrong lighting, wrong pose, etc.).</li>
-                                    <li>The final photo was downloaded successfully and meets standard specifications.</li>
-                                </ul>
-                            </div>
-
-                            {/* Process */}
-                            <div style={{ background: 'var(--bg-secondary)', padding: 16, borderRadius: 12 }}>
-                                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
-                                    <span>📌</span> Refund Process
-                                </h3>
-                                <ul style={{ paddingLeft: 20, fontSize: 14, color: 'var(--text-muted)', display: 'flex', flexDirection: 'column', gap: 6 }}>
-                                    <li>Contact our support team within 48 hours of rejection.</li>
-                                    <li>Provide proof of rejection (receipt or written reason).</li>
-                                    <li>Refunds will be processed within 5–7 working days after verification.</li>
-                                </ul>
-                            </div>
-
-                        </div>
-
-                        <button
-                            onClick={() => setShowRefund(false)}
                             style={{
                                 marginTop: 32, width: '100%', background: 'var(--bg-accent-dark)', color: '#fff', border: 'none',
                                 padding: '16px', borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: 'pointer'

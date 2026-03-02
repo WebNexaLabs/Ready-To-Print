@@ -1,12 +1,8 @@
 import { useState } from 'react';
-import { ShieldCheck, Scissors, ArrowRight, Camera, Printer, FileText, CheckCircle, Lock, BadgeCheck } from 'lucide-react';
+import { ShieldCheck, Scissors, Camera, CheckCircle, Lock, BadgeCheck } from 'lucide-react';
 import Editor from './components/Editor';
 import UploadSection from './components/UploadSection';
-import Login from './components/Login';
-import Signup from './components/Signup';
-import Pricing from './components/Pricing';
 import PhotoGuidelines from './components/PhotoGuidelines';
-import OrderPrints from './components/OrderPrints';
 import PrivacyPolicy from './components/PrivacyPolicy';
 import TermsOfService from './components/TermsOfService';
 import GlobalModals from './components/GlobalModals';
@@ -21,14 +17,11 @@ const uploadPeerId = new URLSearchParams(window.location.search).get('upload');
 
 function App() {
   const [images, setImages] = useState([]);
-  const [view, setView] = useState('home'); // 'home', 'login', 'signup', 'order', 'pricing', 'guidelines', 'privacy', 'terms'
+  const [view, setView] = useState('home'); // 'home', 'guidelines', 'privacy', 'terms'
   const [showPrivacy, setShowPrivacy] = useState(false);
-  const [showRefund, setShowRefund] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [showSubscription, setShowSubscription] = useState(false);
   const [showQR, setShowQR] = useState(false);
-  const [orderImage, setOrderImage] = useState(null);
-  const [orderSheetLabel, setOrderSheetLabel] = useState('A4');
 
   // If opened via QR code on phone, render mobile upload page
   if (uploadPeerId) {
@@ -39,53 +32,14 @@ function App() {
     setImages(imageDataUrls);
   };
 
-  const handleOrder = (img, label) => {
-    setOrderImage(img);
-    setOrderSheetLabel(label);
-    setView('order');
-  };
-
-  if (view === 'login') {
-    return <Login onBack={() => setView('home')} onSignup={() => setView('signup')} />;
-  }
-
-  if (view === 'signup') {
-    return <Signup onLogin={() => setView('login')} onBack={() => setView('home')} />;
-  }
-
-  if (view === 'pricing') {
-    return (
-      <>
-
-        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
-        <Pricing
-          onOrder={() => setView('home')}
-          onNavigate={(page) => {
-            setView(page);
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }}
-          onSupport={() => setShowSupport(true)}
-          onUpgrade={() => setShowSubscription(true)}
-        />
-        <GlobalModals
-          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
-          showSupport={showSupport} setShowSupport={setShowSupport}
-          showSubscription={showSubscription} setShowSubscription={setShowSubscription}
-        />
-      </>
-    );
-  }
-
   if (view === 'guidelines') {
     return (
       <>
 
-        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} />
         <PhotoGuidelines />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
           showSupport={showSupport} setShowSupport={setShowSupport}
         />
       </>
@@ -96,11 +50,10 @@ function App() {
     return (
       <>
 
-        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} />
         <PrivacyPolicy />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
           showSupport={showSupport} setShowSupport={setShowSupport}
         />
       </>
@@ -111,24 +64,10 @@ function App() {
     return (
       <>
 
-        <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
+        <Header view={view} setView={setView} setShowSupport={setShowSupport} />
         <TermsOfService />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
-          showSupport={showSupport} setShowSupport={setShowSupport}
-        />
-      </>
-    );
-  }
-
-  if (view === 'order' && orderImage) {
-    return (
-      <>
-        <OrderPrints image={orderImage} sheetLabel={orderSheetLabel} onBack={() => setView('home')} />
-        <GlobalModals
-          showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
           showSupport={showSupport} setShowSupport={setShowSupport}
         />
       </>
@@ -141,7 +80,6 @@ function App() {
         <Editor
           images={images}
           onCancel={() => setImages([])}
-          onOrder={handleOrder}
           onRemoveImage={(index) => {
             const newImages = images.filter((_, i) => i !== index);
             setImages(newImages);
@@ -149,7 +87,6 @@ function App() {
         />
         <GlobalModals
           showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-          showRefund={showRefund} setShowRefund={setShowRefund}
           showSupport={showSupport} setShowSupport={setShowSupport}
         />
       </>
@@ -349,13 +286,7 @@ function App() {
                     cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
                   }}
                 >Upload Your Photo</button>
-                <button
-                  onClick={() => setView('pricing')}
-                  style={{
-                    background: 'rgba(255,255,255,0.15)', color: '#fff',
-                    border: '1px solid rgba(255,255,255,0.3)',
-                    padding: '14px 32px', borderRadius: 12, fontWeight: 700, fontSize: 14, cursor: 'pointer'
-                  }}>See Pricing</button>
+
               </div>
             </div>
           </div>
@@ -382,7 +313,7 @@ function App() {
             </div>
 
             {[
-              { title: 'Quick Links', links: ['Pricing', 'Refund Policy', 'Contact Support', 'Privacy Policy', 'Terms of Service'] }
+              { title: 'Quick Links', links: ['Contact Support', 'Privacy Policy', 'Terms of Service'] }
             ].map((col, i) => (
               <div key={i}>
                 <h4 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>{col.title}</h4>
@@ -398,12 +329,8 @@ function App() {
                           } else if (link === 'Terms of Service') {
                             setView('terms');
                             window.scrollTo({ top: 0, behavior: 'smooth' });
-                          } else if (link === 'Pricing') {
-                            setView('pricing');
                           } else if (link === 'Contact Support') {
                             setShowSupport(true);
-                          } else if (link === 'Refund Policy') {
-                            setShowRefund(true);
                           }
                         }}
                         style={{ fontSize: 13, color: 'var(--text-muted-dark)', textDecoration: 'none' }}
@@ -450,7 +377,6 @@ function App() {
       {/* Global Modals for Privacy, Refund, and Support */}
       <GlobalModals
         showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
-        showRefund={showRefund} setShowRefund={setShowRefund}
         showSupport={showSupport} setShowSupport={setShowSupport}
         showSubscription={showSubscription} setShowSubscription={setShowSubscription}
       />

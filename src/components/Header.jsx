@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, Menu, X, Sun, Moon } from 'lucide-react';
 
-const Header = ({ view, setView, setShowSupport, onLogin }) => {
+const Header = ({ view, setView, setShowSupport }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isLight, setIsLight] = useState(() => {
         return localStorage.getItem('theme') === 'light';
@@ -41,7 +41,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
 
                 {/* Desktop Nav */}
                 <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted-dark)' }}>
-                    {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
+                    {['Home', 'Photo Guidelines', 'Support'].map(item => (
                         <a key={item} href="#" style={{
                             color: view === item.toLowerCase() || (item === 'Photo Guidelines' && view === 'guidelines') ? '#2563EB' : 'inherit',
                             textDecoration: 'none',
@@ -49,8 +49,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                         }}
                             onClick={(e) => {
                                 e.preventDefault();
-                                if (item === 'Pricing') handleNavClick(null, () => setView('pricing'));
-                                else if (item === 'Home') handleNavClick(null, () => setView('home'));
+                                if (item === 'Home') handleNavClick(null, () => setView('home'));
                                 else if (item === 'Photo Guidelines') handleNavClick(null, () => setView('guidelines'));
                                 else if (item === 'Support') {
                                     e.preventDefault();
@@ -70,13 +69,6 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                         style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '8px' }}
                     >
                         {isLight ? <Moon size={20} /> : <Sun size={20} />}
-                    </button>
-                    <button
-                        className="login-btn"
-                        onClick={onLogin}
-                        style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', cursor: 'pointer' }}
-                    >
-                        Login
                     </button>
                     {/* Mobile Menu Button */}
                     <button
@@ -98,7 +90,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                     boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
                     zIndex: 100
                 }}>
-                    {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
+                    {['Home', 'Photo Guidelines', 'Support'].map(item => (
                         <a key={item} href="#" style={{
                             fontSize: 16, fontWeight: 600,
                             color: view === item.toLowerCase() || (item === 'Photo Guidelines' && view === 'guidelines') ? '#2563EB' : 'var(--text-primary)',
@@ -106,8 +98,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                         }}
                             onClick={(e) => {
                                 e.preventDefault();
-                                if (item === 'Pricing') handleNavClick(null, () => setView('pricing'));
-                                else if (item === 'Home') handleNavClick(null, () => setView('home'));
+                                if (item === 'Home') handleNavClick(null, () => setView('home'));
                                 else if (item === 'Photo Guidelines') handleNavClick(null, () => setView('guidelines'));
                                 else if (item === 'Support') {
                                     setShowSupport(true);
@@ -116,25 +107,11 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                             }}
                         >{item}</a>
                     ))}
-                    <button
-                        onClick={() => {
-                            onLogin();
-                            setMobileMenuOpen(false);
-                        }}
-                        style={{
-                            background: 'var(--bg-accent-dark)', border: 'none', padding: '12px',
-                            borderRadius: 8, fontSize: 15, fontWeight: 600, color: '#2563EB',
-                            cursor: 'pointer', width: '100%', textAlign: 'center'
-                        }}
-                    >
-                        Login
-                    </button>
                 </div>
             )}
             <style>{`
                 @media (max-width: 640px) {
                     .header-nav { display: none !important; }
-                    .header-actions .login-btn { display: none !important; }
                     .mobile-menu-btn { display: block !important; }
                 }
             `}</style>

@@ -19,7 +19,7 @@ const BG_PRESETS = [
     { label: 'Cream', color: '#FEF9C3' },
 ];
 
-export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
+export default function Editor({ images, onCancel, onRemoveImage }) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const currentImage = images[currentIndex];
 
@@ -1059,21 +1059,6 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                         }}
                                     >
                                         <FileImage style={{ width: 16, height: 16 }} /> Download {activePageSize.label} Sheet (PDF)
-                                    </button>
-
-                                    <button
-                                        onClick={() => {
-                                            // Capture current sheet as image and pass to order page
-                                            if (onOrder) onOrder(result.sheets[activePageSize.id], activePageSize.label);
-                                        }}
-                                        style={{
-                                            flex: 1, minWidth: 130, background: 'var(--bg-accent-dark)', color: '#fff', border: 'none',
-                                            padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
-                                            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                                            whiteSpace: 'nowrap'
-                                        }}
-                                    >
-                                        <Printer style={{ width: 16, height: 16 }} /> Order Prints (₹{activePageSize.id === '4x6' ? 64 : 99})
                                     </button>
                                 </div>
 
