@@ -20,7 +20,6 @@ function App() {
   const [view, setView] = useState('home'); // 'home', 'guidelines', 'privacy', 'terms'
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
-  const [showSubscription, setShowSubscription] = useState(false);
   const [showQR, setShowQR] = useState(false);
 
   // If opened via QR code on phone, render mobile upload page
@@ -96,7 +95,7 @@ function App() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Header */}
-      <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
+      <Header view={view} setView={setView} setShowSupport={setShowSupport} />
 
       {/* Hero Section */}
       <section style={{ maxWidth: 1280, margin: '0 auto', padding: '60px 24px 40px' }}>
@@ -378,7 +377,6 @@ function App() {
       <GlobalModals
         showPrivacy={showPrivacy} setShowPrivacy={setShowPrivacy}
         showSupport={showSupport} setShowSupport={setShowSupport}
-        showSubscription={showSubscription} setShowSubscription={setShowSubscription}
       />
 
       {/* Responsive media query via style tag */}
