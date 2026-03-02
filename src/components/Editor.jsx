@@ -254,28 +254,85 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
 
 
+    // Refine alpha channel: soften jagged edges from AI segmentation
+    const refineAlpha = (ctx, width, height, radius = 1) => {
+        const imageData = ctx.getImageData(0, 0, width, height);
+        const data = imageData.data;
+        const alpha = new Float32Array(width * height);
+
+        // Extract alpha channel
+        for (let i = 0; i < alpha.length; i++) {
+            alpha[i] = data[i * 4 + 3] / 255;
+        }
+
+        // Gaussian-like blur on alpha only (3x3 kernel)
+        const blurred = new Float32Array(alpha.length);
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                let sum = 0, weight = 0;
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        const nx = x + dx, ny = y + dy;
+                        if (nx >= 0 && nx < width && ny >= 0 && ny < height) {
+                            const w = 1 / (1 + Math.abs(dx) + Math.abs(dy));
+                            sum += alpha[ny * width + nx] * w;
+                            weight += w;
+                        }
+                    }
+                }
+                blurred[y * width + x] = sum / weight;
+            }
+        }
+
+        // Apply refined alpha — only smooth edge pixels, preserve solid interior/exterior
+        for (let i = 0; i < alpha.length; i++) {
+            const orig = alpha[i];
+            // Only refine pixels near edges (alpha between 0.02 and 0.98)
+            if (orig > 0.02 && orig < 0.98) {
+                data[i * 4 + 3] = Math.round(blurred[i] * 255);
+            } else if (orig <= 0.02) {
+                // Strengthen near-transparent pixels to fully transparent
+                data[i * 4 + 3] = 0;
+            }
+        }
+
+        ctx.putImageData(imageData, 0, 0);
+    };
+
     const applyBgColor = async (blobUrl, color, brightness = 0, contrast = 0) => {
         const img = await createImage(blobUrl);
+        const w = img.width;
+        const h = img.height;
+
+        // Step 1: Refine edges on the transparent subject
+        const subjectCanvas = document.createElement('canvas');
+        const subjectCtx = subjectCanvas.getContext('2d');
+        subjectCanvas.width = w;
+        subjectCanvas.height = h;
+        subjectCtx.drawImage(img, 0, 0);
+        refineAlpha(subjectCtx, w, h, 1);
+
+        // Step 2: Compose onto background
         const canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
-        canvas.width = img.width;
-        canvas.height = img.height;
+        canvas.width = w;
+        canvas.height = h;
 
         // Fill with chosen background color
         ctx.fillStyle = color;
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillRect(0, 0, w, h);
 
-        // Draw the transparent image on top with filters
+        // Draw the refined transparent subject on top with filters
         const brightnessVal = 1 + brightness / 100;
         const contrastVal = 1 + contrast / 100;
         ctx.filter = `brightness(${brightnessVal}) contrast(${contrastVal})`;
-        ctx.drawImage(img, 0, 0);
+        ctx.drawImage(subjectCanvas, 0, 0);
         ctx.filter = 'none';
 
         return new Promise((resolve) => {
             canvas.toBlob((file) => {
                 resolve(URL.createObjectURL(file));
-            }, 'image/jpeg', 0.95);
+            }, 'image/jpeg', 0.98);
         });
     };
 
@@ -298,12 +355,15 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
         });
     };
 
-    // Downscale image for faster BG removal — passport photos don't need 4000px for AI
-    const downscaleForBgRemoval = async (blob, maxDim = 1024) => {
-        const img = await createImage(URL.createObjectURL(blob));
+    // Downscale image for BG removal — the AI model works best at 1024-1536px
+    // Going higher wastes VRAM/time without quality gains; going lower loses detail
+    const downscaleForBgRemoval = async (blob, maxDim = 1536) => {
+        const url = URL.createObjectURL(blob);
+        const img = await createImage(url);
         const { naturalWidth: w, naturalHeight: h } = img;
+        URL.revokeObjectURL(url);
 
-        // Skip if already small enough
+        // Skip if already within range
         if (w <= maxDim && h <= maxDim) return blob;
 
         const scale = maxDim / Math.max(w, h);
@@ -311,10 +371,68 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
         canvas.width = Math.round(w * scale);
         canvas.height = Math.round(h * scale);
         const ctx = canvas.getContext('2d');
+        // Use high-quality downscaling
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
         return new Promise((resolve) => {
             canvas.toBlob((b) => resolve(b), 'image/png');
+        });
+    };
+
+    // Upscale the alpha mask back to the original image dimensions for crisp compositing
+    const upscaleAlphaMask = async (removedBgBlob, originalBlob) => {
+        const origUrl = URL.createObjectURL(originalBlob);
+        const origImg = await createImage(origUrl);
+        URL.revokeObjectURL(origUrl);
+
+        const maskUrl = URL.createObjectURL(removedBgBlob);
+        const maskImg = await createImage(maskUrl);
+        URL.revokeObjectURL(maskUrl);
+
+        // If same size, no upscale needed
+        if (origImg.width === maskImg.width && origImg.height === maskImg.height) {
+            return removedBgBlob;
+        }
+
+        const w = origImg.width;
+        const h = origImg.height;
+
+        // Extract alpha from the AI result at the mask's resolution, then apply to full-res original
+        const maskCanvas = document.createElement('canvas');
+        const maskCtx = maskCanvas.getContext('2d');
+        maskCanvas.width = maskImg.width;
+        maskCanvas.height = maskImg.height;
+        maskCtx.drawImage(maskImg, 0, 0);
+
+        // Create alpha-only canvas at original resolution
+        const alphaCanvas = document.createElement('canvas');
+        const alphaCtx = alphaCanvas.getContext('2d');
+        alphaCanvas.width = w;
+        alphaCanvas.height = h;
+        alphaCtx.imageSmoothingEnabled = true;
+        alphaCtx.imageSmoothingQuality = 'high';
+        // Draw mask stretched to original size to get upscaled alpha
+        alphaCtx.drawImage(maskCanvas, 0, 0, w, h);
+        const alphaData = alphaCtx.getImageData(0, 0, w, h);
+
+        // Draw original image at full resolution
+        const outCanvas = document.createElement('canvas');
+        const outCtx = outCanvas.getContext('2d');
+        outCanvas.width = w;
+        outCanvas.height = h;
+        outCtx.drawImage(origImg, 0, 0);
+        const outData = outCtx.getImageData(0, 0, w, h);
+
+        // Apply the upscaled alpha channel from the mask to the original pixels
+        for (let i = 0; i < outData.data.length; i += 4) {
+            outData.data[i + 3] = alphaData.data[i + 3];
+        }
+        outCtx.putImageData(outData, 0, 0);
+
+        return new Promise((resolve) => {
+            outCanvas.toBlob((b) => resolve(b), 'image/png');
         });
     };
 
@@ -449,21 +567,40 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                         removedBgBlob = await removeBgResponse.blob();
                     } else {
-                        setProcessingStatus(`Loading AI Model (photo ${i + 1})...`);
+                        setProcessingStatus(`Preparing AI model (photo ${i + 1})...`);
                         const { removeBackground } = await import('@imgly/background-removal');
+
+                        // Downscale for optimal AI processing (1536px max)
+                        const scaledFile = await downscaleForBgRemoval(uniqueFile, 1536);
+                        const inputFile = scaledFile === uniqueFile
+                            ? uniqueFile
+                            : new File([scaledFile], uniqueFile.name, { type: 'image/png' });
+
                         let lastPercent = -1;
-                        // Pass the uniquely named File object to break internal caches
-                        removedBgBlob = await removeBackground(uniqueFile, {
-                            model: 'medium',
-                            output: { format: 'image/png', quality: 0.8 },
+                        // Use full-precision 'large' model (isnet) for best edge quality
+                        const aiResult = await removeBackground(inputFile, {
+                            model: 'large',
+                            output: { format: 'image/png', quality: 1.0 },
                             progress: (key, current, total) => {
                                 const percent = total > 0 ? Math.round((current / total) * 100) : 0;
                                 if (percent !== lastPercent) {
                                     lastPercent = percent;
-                                    setProcessingStatus(`Loading AI Model... ${percent}%`);
+                                    if (key === 'compute:inference') {
+                                        setProcessingStatus(`Removing background... ${percent}%`);
+                                    } else {
+                                        setProcessingStatus(`Loading AI Model... ${percent}%`);
+                                    }
                                 }
                             }
                         });
+
+                        // If we downscaled, upscale the mask back to original resolution
+                        if (scaledFile !== uniqueFile) {
+                            setProcessingStatus(`Refining edges (photo ${i + 1})...`);
+                            removedBgBlob = await upscaleAlphaMask(aiResult, uniqueFile);
+                        } else {
+                            removedBgBlob = aiResult;
+                        }
                     }
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
@@ -1402,9 +1539,9 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                             }}
                                         >
                                             <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                                                <Smartphone style={{ width: 14, height: 14 }} /> On-Device
+                                                <Smartphone style={{ width: 14, height: 14 }} /> On-Device AI
                                             </span>
-                                            <span style={{ fontSize: 10, opacity: 0.7, fontWeight: 500 }}>Slower, private</span>
+                                            <span style={{ fontSize: 10, opacity: 0.7, fontWeight: 500 }}>High quality, private</span>
                                         </button>
 
                                         <button
