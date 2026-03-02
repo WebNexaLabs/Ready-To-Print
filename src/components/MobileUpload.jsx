@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from 'react';
 import Peer from 'peerjs';
-import { Camera, Upload, CheckCircle, Smartphone, ImagePlus, X, Wifi, WifiOff, Image } from 'lucide-react';
+import { Camera, Upload, CheckCircle, Smartphone, ImagePlus, X, Wifi, WifiOff, Image, Send, ArrowRight } from 'lucide-react';
 
 const MAX_DIM = 2048; // Max dimension to resize to before sending
 
 function resizeImage(dataUrl, maxDim) {
     return new Promise((resolve) => {
-        const img = new Image();
+        const img = new window.Image();
         img.onload = () => {
             const { naturalWidth: w, naturalHeight: h } = img;
-            // Skip resize if already small
             if (w <= maxDim && h <= maxDim) {
                 resolve(dataUrl);
                 return;
@@ -30,18 +29,32 @@ export default function MobileUpload({ peerId }) {
     const [status, setStatus] = useState('connecting'); // 'connecting', 'ready', 'sending', 'sent', 'error'
     const [sentCount, setSentCount] = useState(0);
     const [sendingFile, setSendingFile] = useState(false);
-    const [previews, setPreviews] = useState([]);
+    const [selectedPhotos, setSelectedPhotos] = useState([]); // photos chosen but not yet sent
+    const [sentPhotos, setSentPhotos] = useState([]); // photos successfully sent
     const connRef = useRef(null);
+    const peerRef = useRef(null);
     const galleryInputRef = useRef(null);
 
     useEffect(() => {
-        const peer = new Peer();
+        const peerConfig = {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun.cloudflare.com:3478' },
+                ]
+            }
+        };
+        const peer = new Peer(undefined, peerConfig);
+        peerRef.current = peer;
 
         peer.on('open', () => {
             const conn = peer.connect(peerId, { reliable: true });
             connRef.current = conn;
 
             conn.on('open', () => {
+                console.log('Connected to desktop peer');
                 setStatus('ready');
             });
 
@@ -60,12 +73,11 @@ export default function MobileUpload({ peerId }) {
             setStatus('error');
         });
 
-        // Timeout: if not connected after 15s, show error
         const timeout = setTimeout(() => {
             if (!connRef.current || !connRef.current.open) {
                 setStatus(s => s === 'connecting' ? 'error' : s);
             }
-        }, 15000);
+        }, 20000);
 
         return () => {
             clearTimeout(timeout);
@@ -73,41 +85,48 @@ export default function MobileUpload({ peerId }) {
         };
     }, [peerId]);
 
-    const sendPhoto = async (dataUrl) => {
-        if (!connRef.current || !connRef.current.open) {
-            alert('Not connected to desktop. Please scan the QR code again.');
-            return;
-        }
-        setSendingFile(true);
-        try {
-            const resized = await resizeImage(dataUrl, MAX_DIM);
-            connRef.current.send({ type: 'photo', dataUrl: resized });
-            setSentCount(c => c + 1);
-            setStatus('sent');
-        } catch (err) {
-            console.error('Send error:', err);
-        }
-        setSendingFile(false);
-    };
-
+    // Select files — just preview, don't send yet
     const handleFileSelect = (e) => {
         const files = Array.from(e.target.files).filter(f => f.type.startsWith('image/'));
         if (files.length === 0) return;
 
         files.forEach(file => {
             const reader = new FileReader();
-            reader.onload = async (ev) => {
-                const dataUrl = ev.target.result;
-                setPreviews(prev => [...prev, dataUrl]);
-                await sendPhoto(dataUrl);
+            reader.onload = (ev) => {
+                setSelectedPhotos(prev => [...prev, ev.target.result]);
             };
             reader.readAsDataURL(file);
         });
         e.target.value = '';
     };
 
-    const removePreview = (index) => {
-        setPreviews(prev => prev.filter((_, i) => i !== index));
+    const removeSelected = (index) => {
+        setSelectedPhotos(prev => prev.filter((_, i) => i !== index));
+    };
+
+    // Send all selected photos
+    const handleSend = async () => {
+        if (!connRef.current || !connRef.current.open) {
+            alert('Not connected to desktop. Please scan the QR code again.');
+            return;
+        }
+        if (selectedPhotos.length === 0) return;
+
+        setSendingFile(true);
+        for (const photo of selectedPhotos) {
+            try {
+                const resized = await resizeImage(photo, MAX_DIM);
+                console.log('Sending photo, length:', resized.length);
+                connRef.current.send({ type: 'photo', dataUrl: resized });
+                setSentPhotos(prev => [...prev, photo]);
+                setSentCount(c => c + 1);
+            } catch (err) {
+                console.error('Send error:', err);
+            }
+        }
+        setSelectedPhotos([]);
+        setStatus('sent');
+        setSendingFile(false);
     };
 
     const isConnected = status === 'ready' || status === 'sent' || status === 'sending';
@@ -219,30 +238,99 @@ export default function MobileUpload({ peerId }) {
                             onClick={() => galleryInputRef.current?.click()}
                             disabled={sendingFile}
                             style={{
-                                width: '100%', background: '#2563EB', color: '#fff', border: 'none',
+                                width: '100%', background: 'var(--bg-primary)', color: 'var(--text-primary)', 
+                                border: '2px dashed var(--border-light)',
                                 padding: '15px 24px', borderRadius: 14, fontWeight: 700, fontSize: 15,
                                 cursor: sendingFile ? 'wait' : 'pointer',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                                boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)',
                                 opacity: sendingFile ? 0.7 : 1, transition: 'opacity 0.2s'
                             }}
                         >
-                            <Image style={{ width: 19, height: 19 }} />
-                            {sendingFile ? 'Sending...' : 'Choose from Gallery'}
+                            <ImagePlus style={{ width: 19, height: 19 }} />
+                            Select Photos
                         </button>
 
-                        {/* Sent previews */}
-                        {previews.length > 0 && (
-                            <div style={{ marginTop: 20 }}>
+                        {/* Selected photos preview (not yet sent) */}
+                        {selectedPhotos.length > 0 && (
+                            <div style={{ marginTop: 16 }}>
                                 <p style={{
                                     fontSize: 12, fontWeight: 700, color: 'var(--text-muted-dark)',
                                     marginBottom: 10, textAlign: 'left',
                                     textTransform: 'uppercase', letterSpacing: '0.05em'
                                 }}>
-                                    Sent ({previews.length})
+                                    Selected ({selectedPhotos.length})
                                 </p>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                                    {previews.map((p, i) => (
+                                    {selectedPhotos.map((p, i) => (
+                                        <div key={i} style={{
+                                            position: 'relative', aspectRatio: '3/4', borderRadius: 12,
+                                            overflow: 'hidden', border: '2px solid #2563EB',
+                                            background: 'var(--bg-primary)'
+                                        }}>
+                                            <img src={p} alt={`Selected ${i + 1}`} style={{
+                                                width: '100%', height: '100%', objectFit: 'cover'
+                                            }} />
+                                            <button
+                                                onClick={() => removeSelected(i)}
+                                                style={{
+                                                    position: 'absolute', top: 4, right: 4,
+                                                    width: 22, height: 22, borderRadius: '50%',
+                                                    background: 'rgba(0,0,0,0.6)', border: 'none',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    cursor: 'pointer', padding: 0
+                                                }}
+                                            >
+                                                <X style={{ width: 12, height: 12, color: '#fff' }} />
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* SEND BUTTON */}
+                                <button
+                                    onClick={handleSend}
+                                    disabled={sendingFile}
+                                    style={{
+                                        width: '100%', marginTop: 12,
+                                        background: sendingFile ? '#1D4ED8' : '#2563EB', color: '#fff', border: 'none',
+                                        padding: '15px 24px', borderRadius: 14, fontWeight: 700, fontSize: 15,
+                                        cursor: sendingFile ? 'wait' : 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                        boxShadow: '0 4px 16px rgba(37, 99, 235, 0.3)',
+                                        opacity: sendingFile ? 0.8 : 1, transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {sendingFile ? (
+                                        <>
+                                            <div className="mu-spinner" style={{
+                                                width: 18, height: 18,
+                                                border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff',
+                                                borderRadius: '50%'
+                                            }} />
+                                            Sending...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Send style={{ width: 18, height: 18 }} />
+                                            Send {selectedPhotos.length} Photo{selectedPhotos.length !== 1 ? 's' : ''} to Desktop
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        )}
+
+                        {/* Sent photos */}
+                        {sentPhotos.length > 0 && (
+                            <div style={{ marginTop: 20 }}>
+                                <p style={{
+                                    fontSize: 12, fontWeight: 700, color: '#22C55E',
+                                    marginBottom: 10, textAlign: 'left',
+                                    textTransform: 'uppercase', letterSpacing: '0.05em'
+                                }}>
+                                    Sent ({sentPhotos.length})
+                                </p>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                                    {sentPhotos.map((p, i) => (
                                         <div key={i} style={{
                                             position: 'relative', aspectRatio: '3/4', borderRadius: 12,
                                             overflow: 'hidden', border: '2px solid var(--border-light)',
@@ -267,7 +355,7 @@ export default function MobileUpload({ peerId }) {
                         )}
 
                         {/* Sent count badge */}
-                        {sentCount > 0 && (
+                        {sentCount > 0 && selectedPhotos.length === 0 && (
                             <div style={{
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                                 padding: '10px 18px', borderRadius: 12,

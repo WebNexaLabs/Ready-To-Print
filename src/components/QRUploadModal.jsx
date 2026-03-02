@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import Peer from 'peerjs';
 import { Smartphone, X, CheckCircle, Wifi, WifiOff, Camera, Copy, Check, QrCode, Upload } from 'lucide-react';
@@ -10,15 +10,23 @@ export default function QRUploadModal({ onReceive, onClose }) {
     const [copied, setCopied] = useState(false);
     const peerRef = useRef(null);
     const connRef = useRef(null);
+    const onReceiveRef = useRef(onReceive);
 
-    const handleReceive = useCallback((dataUrl) => {
-        onReceive(dataUrl);
-        setReceivedCount(c => c + 1);
-        setStatus('done');
-    }, [onReceive]);
+    // Keep ref in sync without re-triggering effects
+    useEffect(() => { onReceiveRef.current = onReceive; }, [onReceive]);
 
     useEffect(() => {
-        const peer = new Peer();
+        const peerConfig = {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun.cloudflare.com:3478' },
+                ]
+            }
+        };
+        const peer = new Peer(undefined, peerConfig);
         peerRef.current = peer;
 
         peer.on('open', (id) => {
@@ -31,8 +39,13 @@ export default function QRUploadModal({ onReceive, onClose }) {
             setStatus('connected');
 
             conn.on('data', (data) => {
-                if (data && data.type === 'photo' && data.dataUrl) {
-                    handleReceive(data.dataUrl);
+                if (!data) return;
+                // Simple protocol: receive full photo dataUrl
+                if (data.type === 'photo' && typeof data.dataUrl === 'string') {
+                    console.log('Received photo, length:', data.dataUrl.length);
+                    onReceiveRef.current(data.dataUrl);
+                    setReceivedCount(c => c + 1);
+                    setStatus('done');
                 }
             });
 
@@ -43,16 +56,17 @@ export default function QRUploadModal({ onReceive, onClose }) {
 
         peer.on('error', (err) => {
             console.error('Peer error:', err);
-            if (status === 'generating' || status === 'waiting') {
-                setStatus('error');
-            }
+            setStatus(prev => {
+                if (prev === 'generating' || prev === 'waiting') return 'error';
+                return prev;
+            });
         });
 
         return () => {
             if (connRef.current) connRef.current.close();
             peer.destroy();
         };
-    }, []);
+    }, []); // stable — no deps, uses refs for callbacks
 
     const uploadUrl = peerId
         ? `${window.location.origin}${window.location.pathname}?upload=${peerId}`
