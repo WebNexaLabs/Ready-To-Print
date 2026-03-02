@@ -76,12 +76,12 @@ const PhotoGuidelines = () => {
     ];
 
     return (
-        <div style={{ maxWidth: 1350, margin: '0 auto', padding: '60px 24px', fontFamily: "'Inter', sans-serif" }}>
-            <div style={{ textAlign: 'center', marginBottom: 60 }}>
-                <h1 style={{ fontSize: 42, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
+        <div className="guidelines-page" style={{ maxWidth: 1350, margin: '0 auto', padding: '60px 24px', fontFamily: "'Inter', sans-serif" }}>
+            <div className="guidelines-header" style={{ textAlign: 'center', marginBottom: 60 }}>
+                <h1 style={{ fontSize: 42, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>
                     Photo <span style={{ color: '#2563EB' }}>Guidelines</span>
                 </h1>
-                <p style={{ fontSize: 18, color: '#64748B', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 18, color: 'var(--text-muted-dark)', maxWidth: 600, margin: '0 auto', lineHeight: 1.6 }}>
                     Follow these simple rules to ensure your passport photo is approved first time.
                 </p>
             </div>
@@ -89,8 +89,8 @@ const PhotoGuidelines = () => {
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 32 }}>
                 {guidelines.map((section, index) => (
                     <div key={index} className="guideline-card" style={{
-                        background: '#fff', borderRadius: 24, padding: 32,
-                        border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
+                        background: 'var(--bg-primary)', borderRadius: 24, padding: 32,
+                        border: '1px solid var(--border-light)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)',
                         transition: 'transform 0.2s',
                         cursor: 'default',
                         display: 'flex', flexDirection: 'column'
@@ -100,18 +100,18 @@ const PhotoGuidelines = () => {
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 24 }}>
                             <div style={{
-                                width: 56, height: 56, borderRadius: 16, background: '#F8FAFC',
+                                width: 56, height: 56, borderRadius: 16, background: 'var(--bg-secondary)',
                                 display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
                             }}>
                                 {section.icon}
                             </div>
-                            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A' }}>{section.title}</h3>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>{section.title}</h3>
                         </div>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                             {section.points.map((point, i) => (
                                 <li key={i} style={{ display: 'flex', gap: 12, marginBottom: 12, alignItems: 'flex-start' }}>
                                     <CheckCircle style={{ width: 18, height: 18, color: '#22C55E', flexShrink: 0, marginTop: 3 }} />
-                                    <span style={{ fontSize: 15, color: '#475569', lineHeight: 1.5 }}>{point}</span>
+                                    <span style={{ fontSize: 15, color: 'var(--text-muted)', lineHeight: 1.5 }}>{point}</span>
                                 </li>
                             ))}
                         </ul>

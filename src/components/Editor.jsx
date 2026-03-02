@@ -12,7 +12,7 @@ import {
 
 const BG_PRESETS = [
     { label: 'White', color: '#FFFFFF' },
-    { label: 'Light Gray', color: '#E5E7EB' },
+    { label: 'Light Gray', color: 'var(--text-tertiary)' },
     { label: 'Light Blue', color: '#DBEAFE' },
     { label: 'Red', color: '#DC2626' },
     { label: 'Blue', color: '#2563EB' },
@@ -438,7 +438,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         const removeBgResponse = await fetch('https://api.remove.bg/v1.0/removebg', {
                             method: 'POST',
                             headers: {
-                                'X-Api-Key': '8Qu6V5HmD5HuKHKoQE7orQvt',
+                                'X-Api-Key': import.meta.env.VITE_REMOVE_BG_API_KEY,
                             },
                             body: formData,
                         });
@@ -611,10 +611,10 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
     // ======= RESULT VIEW (Image 3) =======
     if (result) {
         return (
-            <div style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Inter', system-ui, sans-serif" }}>
+            <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', fontFamily: "'Inter', system-ui, sans-serif" }}>
                 {/* Header */}
                 <header style={{
-                    background: '#fff', borderBottom: '1px solid #E2E8F0',
+                    background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)',
                     padding: '0 24px', position: 'sticky', top: 0, zIndex: 50
                 }}>
                     <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 64, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -622,7 +622,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                                 <Camera style={{ width: 16, height: 16 }} />
                             </div>
-                            <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                            <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
                                 SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
                             </span>
                         </div>
@@ -630,7 +630,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             onClick={onCancel}
                             style={{
                                 background: 'none', border: 'none', fontSize: 14, fontWeight: 600,
-                                color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
+                                color: 'var(--text-muted-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
                             }}
                         >
                             <RefreshCw style={{ width: 16, height: 16 }} /> Start Over
@@ -639,7 +639,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                 </header>
 
                 {/* Step Progress */}
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 0, padding: '32px 24px 24px', alignItems: 'center' }}>
+                <div className="result-step-progress" style={{ display: 'flex', justifyContent: 'center', gap: 0, padding: '32px 24px 24px', alignItems: 'center' }}>
                     {[
                         { num: 1, label: 'Upload', done: true, action: onCancel },
                         { num: 2, label: 'Edit', done: true, action: () => setResult(null) },
@@ -665,7 +665,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                 </div>
                                 <span style={{ fontSize: 14, fontWeight: 600, color: step.active ? '#0F172A' : '#64748B' }}>{step.label}</span>
                             </div>
-                            {i < 2 && <div style={{ width: 80, height: 2, background: '#E2E8F0', margin: '0 16px' }}></div>}
+                            {i < 2 && <div className="step-connector" style={{ width: 80, height: 2, background: '#27273A', margin: '0 16px' }}></div>}
                         </div>
                     ))}
                 </div>
@@ -676,29 +676,28 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     <div className="result-left">
                         {/* Print Quantity Selector */}
                         <div style={{
-                            background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
+                            background: 'var(--bg-primary)', borderRadius: 16, border: '1px solid var(--border-light)',
                             padding: 24, marginBottom: 20
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A' }}>Your Uploads</h3>
-                                <button onClick={() => {/* Add logic to go back to upload if needed */ }} style={{ fontSize: 13, color: '#2563EB', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Add More</button>
+                                <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)' }}>Your Uploads</h3>
                             </div>
 
                             <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                 {result.singles.map((s, i) => (
                                     <div key={i} style={{
                                         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                                        padding: 12, borderRadius: 12, border: '1px solid #F1F5F9', background: '#F8FAFC'
+                                        padding: 12, borderRadius: 12, border: '1px solid var(--border-dark)', background: 'var(--bg-secondary)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            <img src={s} alt={`Img ${i}`} style={{ width: 40, height: 50, objectFit: 'cover', borderRadius: 6, border: '1px solid #E2E8F0' }} />
-                                            <span style={{ fontSize: 14, fontWeight: 600, color: '#334155' }}>Image {i + 1}</span>
+                                            <img src={s} alt={`Img ${i}`} style={{ width: 40, height: 50, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border-light)' }} />
+                                            <span style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-tertiary)' }}>Image {i + 1}</span>
                                         </div>
 
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <button onClick={() => handleCountChange(i, -1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #E2E8F0', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>-</button>
+                                            <button onClick={() => handleCountChange(i, -1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid var(--border-light)', background: 'var(--bg-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted-dark)' }}>-</button>
                                             <span style={{ fontSize: 14, fontWeight: 700, width: 20, textAlign: 'center' }}>{printCounts[i]}</span>
-                                            <button onClick={() => handleCountChange(i, 1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid #E2E8F0', background: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748B' }}>+</button>
+                                            <button onClick={() => handleCountChange(i, 1)} style={{ width: 28, height: 28, borderRadius: '50%', border: '1px solid var(--border-light)', background: 'var(--bg-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted-dark)' }}>+</button>
                                         </div>
                                     </div>
                                 ))}
@@ -706,12 +705,12 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                             {/* Empty Slot Placeholder if needed */}
 
-                            <div style={{ marginTop: 20, padding: 16, background: '#EFF6FF', borderRadius: 12 }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, fontWeight: 600, color: '#1E293B' }}>
+                            <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-accent-dark)', borderRadius: 12 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8, fontSize: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
                                     <span>Total Slots Filled:</span>
                                     <span>{totalFilled} / {maxSlots}</span>
                                 </div>
-                                <div style={{ width: '100%', height: 8, background: '#DBEAFE', borderRadius: 99 }}>
+                                <div style={{ width: '100%', height: 8, background: '#1E3A8A', borderRadius: 99 }}>
                                     <div style={{
                                         width: `${Math.min(100, (totalFilled / maxSlots) * 100)}%`,
                                         height: '100%', background: '#2563EB', borderRadius: 99,
@@ -720,10 +719,10 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                 </div>
 
                                 <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-                                    <button onClick={handleAutoFill} style={{ flex: 1, padding: '8px', background: '#fff', border: '1px solid #DBEAFE', borderRadius: 8, color: '#2563EB', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                    <button onClick={handleAutoFill} style={{ flex: 1, padding: '8px', background: 'var(--bg-primary)', border: '1px solid #1E3A8A', borderRadius: 8, color: '#2563EB', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                                         <Sparkles style={{ width: 14, height: 14 }} /> Auto-fill
                                     </button>
-                                    <button onClick={handleClearAll} style={{ flex: 1, padding: '8px', background: '#fff', border: '1px solid #E2E8F0', borderRadius: 8, color: '#64748B', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                                    <button onClick={handleClearAll} style={{ flex: 1, padding: '8px', background: 'var(--bg-primary)', border: '1px solid var(--border-light)', borderRadius: 8, color: 'var(--text-muted-dark)', fontSize: 13, fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                                         <RefreshCw style={{ width: 14, height: 14 }} /> Clear All
                                     </button>
                                 </div>
@@ -733,13 +732,13 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                         {/* AI Verification (Existing) - Moved below or kept? Let's keep it below */}
                         <div style={{
-                            background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
+                            background: 'var(--bg-primary)', borderRadius: 16, border: '1px solid var(--border-light)',
                             padding: 24, marginBottom: 20
                         }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                                <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0F172A' }}>AI Verification</h3>
+                                <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)' }}>AI Verification</h3>
                                 <span style={{
-                                    background: '#DCFCE7', color: '#15803D', fontSize: 12, fontWeight: 700,
+                                    background: '#064E3B', color: '#15803D', fontSize: 12, fontWeight: 700,
                                     padding: '4px 12px', borderRadius: 999, display: 'flex', alignItems: 'center', gap: 4
                                 }}>
                                     <CheckCircle style={{ width: 14, height: 14 }} /> PASSED
@@ -756,21 +755,21 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                 <div key={i} style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
                                     <CheckCircle style={{ width: 20, height: 20, color: '#22C55E', flexShrink: 0, marginTop: 2 }} />
                                     <div>
-                                        <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A', marginBottom: 2 }}>{check.title}</p>
-                                        <p style={{ fontSize: 12, color: '#94A3B8' }}>{check.desc}</p>
+                                        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', marginBottom: 2 }}>{check.title}</p>
+                                        <p style={{ fontSize: 12, color: 'var(--text-disabled)' }}>{check.desc}</p>
                                     </div>
                                 </div>
                             ))}
 
                             {/* Digital Photos Preview */}
                             <div style={{
-                                background: '#F8FAFC', borderRadius: 12, padding: 16, marginTop: 20,
-                                border: '1px solid #E2E8F0'
+                                background: 'var(--bg-secondary)', borderRadius: 12, padding: 16, marginTop: 20,
+                                border: '1px solid var(--border-light)'
                             }}>
                                 <p style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Processed Photos ({result.singles.length})</p>
                                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     {result.singles.map((s, i) => (
-                                        <img key={i} src={s} alt={`Photo ${i + 1}`} style={{ width: 48, height: 60, borderRadius: 6, objectFit: 'cover', border: '1px solid #E2E8F0' }} />
+                                        <img key={i} src={s} alt={`Photo ${i + 1}`} style={{ width: 48, height: 60, borderRadius: 6, objectFit: 'cover', border: '1px solid var(--border-light)' }} />
                                     ))}
                                 </div>
                             </div>
@@ -778,14 +777,14 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                         {/* Printing Tips */}
                         <div style={{
-                            background: '#EFF6FF', borderRadius: 16, padding: 20,
-                            border: '1px solid #DBEAFE'
+                            background: 'var(--bg-accent-dark)', borderRadius: 16, padding: 20,
+                            border: '1px solid #1E3A8A'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
                                 <Printer style={{ width: 18, height: 18, color: '#2563EB' }} />
                                 <p style={{ fontSize: 15, fontWeight: 700, color: '#1D4ED8' }}>Printing Tips</p>
                             </div>
-                            <p style={{ fontSize: 12, color: '#64748B', lineHeight: 1.7 }}>
+                            <p style={{ fontSize: 12, color: 'var(--text-muted-dark)', lineHeight: 1.7 }}>
                                 For best results, print on <strong>4×6 inch (10×15cm)</strong> glossy photo paper at 100% scale. Do not select "Scale to Fit" in printer settings.
                             </p>
                         </div>
@@ -794,14 +793,14 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     {/* Right: Photo Preview & Downloads */}
                     <div className="result-right" style={{ flex: 1 }}>
                         <div style={{
-                            background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
+                            background: 'var(--bg-primary)', borderRadius: 16, border: '1px solid var(--border-light)',
                             overflow: 'hidden'
                         }}>
-                            <div className="result-header" style={{ padding: '20px 24px', borderBottom: '1px solid #F1F5F9' }}>
+                            <div className="result-header" style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-dark)' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
                                     <div>
-                                        <h3 style={{ fontSize: 18, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>Your Passport Photos are Ready</h3>
-                                        <p style={{ fontSize: 13, color: '#94A3B8' }}>Select a page size and download</p>
+                                        <h3 style={{ fontSize: 18, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>Your Passport Photos are Ready</h3>
+                                        <p style={{ fontSize: 13, color: 'var(--text-disabled)' }}>Select a page size and download</p>
                                     </div>
                                 </div>
 
@@ -834,17 +833,17 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                 </div>
                             </div>
 
-                            <div style={{ padding: 24, background: '#F8FAFC', position: 'relative', minHeight: 300 }}>
+                            <div style={{ padding: 24, background: 'var(--bg-secondary)', position: 'relative', minHeight: 300 }}>
                                 <img
                                     src={result.sheets[activePageSize.id]}
                                     alt={`${activePageSize.label} Photo Sheet`}
                                     style={{
                                         width: '100%', maxWidth: 500, margin: '0 auto', display: 'block',
-                                        borderRadius: 8, boxShadow: '0 8px 30px rgba(0,0,0,0.12)',
-                                        border: '1px solid #E2E8F0', transition: 'opacity 0.3s'
+                                        borderRadius: 8, boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
+                                        border: '1px solid var(--border-light)', transition: 'opacity 0.3s'
                                     }}
                                 />
-                                <p style={{ textAlign: 'center', fontSize: 12, color: '#94A3B8', marginTop: 12 }}>
+                                <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-disabled)', marginTop: 12 }}>
                                     {activePageSize.label} — {activePageSize.widthInch}" × {activePageSize.heightInch}" at 300 DPI
                                 </p>
                             </div>
@@ -853,11 +852,11 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             <div className="download-section" style={{ padding: 24 }}>
 
 
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                                <div className="result-download-buttons" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                     <button
                                         onClick={() => result.singles.forEach((s, i) => downloadImage(s, `passport-digital-${i + 1}`))}
                                         style={{
-                                            flex: 1, minWidth: 100, background: '#fff', color: '#334155', border: '1px solid #E2E8F0',
+                                            flex: 1, minWidth: 100, background: 'var(--bg-primary)', color: 'var(--text-tertiary)', border: '1px solid var(--border-light)',
                                             padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                             whiteSpace: 'nowrap'
@@ -873,7 +872,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                             result.singles.forEach((s, i) => downloadPdf(s, w, h, `passport-digital-${i + 1}-${selectedDoc.id}.pdf`));
                                         }}
                                         style={{
-                                            flex: 1, minWidth: 100, background: '#fff', color: '#334155', border: '1px solid #E2E8F0',
+                                            flex: 1, minWidth: 100, background: 'var(--bg-primary)', color: 'var(--text-tertiary)', border: '1px solid var(--border-light)',
                                             padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                             whiteSpace: 'nowrap'
@@ -883,7 +882,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                     </button>
                                 </div>
 
-                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
+                                <div className="result-download-buttons" style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8 }}>
                                     <button
                                         onClick={() => downloadPdf(result.sheets[activePageSize.id], activePageSize.widthInch, activePageSize.heightInch, `passport-${activePageSize.id}-sheet-${selectedDoc.id}.pdf`)}
                                         style={{
@@ -902,7 +901,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                             if (onOrder) onOrder(result.sheets[activePageSize.id], activePageSize.label);
                                         }}
                                         style={{
-                                            flex: 1, minWidth: 130, background: '#0F172A', color: '#fff', border: 'none',
+                                            flex: 1, minWidth: 130, background: 'var(--bg-accent-dark)', color: '#fff', border: 'none',
                                             padding: '14px 12px', borderRadius: 12, fontWeight: 600, fontSize: 13,
                                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                                             whiteSpace: 'nowrap'
@@ -913,9 +912,9 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                 </div>
 
                                 {/* Trust Badges */}
-                                <div style={{
+                                <div className="result-trust-badges" style={{
                                     display: 'flex', justifyContent: 'center', gap: 24, marginTop: 20,
-                                    fontSize: 12, color: '#94A3B8'
+                                    fontSize: 12, color: 'var(--text-disabled)'
                                 }}>
                                     <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                         <Lock style={{ width: 14, height: 14 }} /> Encrypted Transfer
@@ -931,17 +930,17 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         </div>
 
                         {/* Help Banner */}
-                        <div style={{
-                            background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0',
+                        <div className="result-help-banner" style={{
+                            background: 'var(--bg-primary)', borderRadius: 16, border: '1px solid var(--border-light)',
                             padding: '16px 24px', marginTop: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                <div style={{ width: 40, height: 40, borderRadius: '50%', background: '#EFF6FF', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <div style={{ width: 40, height: 40, borderRadius: '50%', background: 'var(--bg-accent-dark)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Camera style={{ width: 18, height: 18, color: '#2563EB' }} />
                                 </div>
                                 <div>
-                                    <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Need help with printing?</p>
-                                    <p style={{ fontSize: 12, color: '#94A3B8' }}>Print at your local photo lab or use our printing guide.</p>
+                                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Need help with printing?</p>
+                                    <p style={{ fontSize: 12, color: 'var(--text-disabled)' }}>Print at your local photo lab or use our printing guide.</p>
                                 </div>
                             </div>
                             <a href="#" style={{ fontSize: 14, fontWeight: 700, color: '#2563EB', textDecoration: 'none' }}>View Guide</a>
@@ -950,21 +949,21 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                 </div>
 
                 {/* Footer */}
-                <footer style={{
-                    borderTop: '1px solid #E2E8F0', padding: '20px 24px', background: '#fff',
+                <footer className="result-view-footer" style={{
+                    borderTop: '1px solid var(--border-light)', padding: '20px 24px', background: 'var(--bg-primary)',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                    fontSize: 13, color: '#94A3B8'
+                    fontSize: 13, color: 'var(--text-disabled)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <div style={{ width: 24, height: 24, background: '#2563EB', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <Camera style={{ width: 12, height: 12 }} />
                         </div>
-                        <span style={{ fontWeight: 700, color: '#64748B' }}>SelfieSePassport</span>
+                        <span style={{ fontWeight: 700, color: 'var(--text-muted-dark)' }}>SelfieSePassport</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 24 }}>
-                        <a href="#" style={{ color: '#94A3B8', textDecoration: 'none' }}>Terms of Service</a>
-                        <a href="#" style={{ color: '#94A3B8', textDecoration: 'none' }}>Privacy Policy</a>
-                        <a href="#" style={{ color: '#94A3B8', textDecoration: 'none' }}>Contact Support</a>
+                    <div className="result-footer-links" style={{ display: 'flex', gap: 24 }}>
+                        <a href="#" style={{ color: 'var(--text-disabled)', textDecoration: 'none' }}>Terms of Service</a>
+                        <a href="#" style={{ color: 'var(--text-disabled)', textDecoration: 'none' }}>Privacy Policy</a>
+                        <a href="#" style={{ color: 'var(--text-disabled)', textDecoration: 'none' }}>Contact Support</a>
                     </div>
                     <span>© 2024 SELFIE SE PASSPORT</span>
                 </footer>
@@ -977,7 +976,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
         <div style={{ height: '100vh', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', system-ui, sans-serif" }}>
             {/* Header */}
             <header style={{
-                background: '#fff', borderBottom: '1px solid #E2E8F0',
+                background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)',
                 padding: '0 24px', flexShrink: 0
             }}>
                 <div style={{ display: 'flex', height: 60, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -985,7 +984,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                             <Camera style={{ width: 16, height: 16 }} />
                         </div>
-                        <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                        <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
                             SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
                         </span>
                     </div>
@@ -994,7 +993,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             onClick={onCancel}
                             style={{
                                 background: 'none', border: 'none', fontSize: 14, fontWeight: 600,
-                                color: '#64748B', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
+                                color: 'var(--text-muted-dark)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6
                             }}
                         >
                             <ChevronLeft style={{ width: 18, height: 18 }} /> Back to Upload
@@ -1045,7 +1044,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     {autoAdjustStatus && (
                         <div style={{
                             position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 15,
-                            background: '#0F172A', color: '#fff', padding: '8px 20px', borderRadius: 999,
+                            background: 'var(--bg-accent-dark)', color: '#fff', padding: '8px 20px', borderRadius: 999,
                             fontSize: 13, fontWeight: 600, boxShadow: '0 4px 12px rgba(0,0,0,0.2)',
                             animation: 'fadeIn 0.3s ease', display: 'flex', alignItems: 'center', gap: 8,
                             whiteSpace: 'nowrap'
@@ -1065,11 +1064,11 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     {images.length > 1 && (
                         <div className="photo-nav-strip" style={{
                             position: 'absolute', top: 16, right: 24, zIndex: 10,
-                            background: '#fff', borderRadius: 12, padding: '6px 8px',
-                            display: 'flex', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                            border: '1px solid #E2E8F0', alignItems: 'center'
+                            background: 'var(--bg-primary)', borderRadius: 12, padding: '6px 8px',
+                            display: 'flex', gap: 6, boxShadow: '0 2px 8px rgba(0,0,0,0.4)',
+                            border: '1px solid var(--border-light)', alignItems: 'center'
                         }}>
-                            <span style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', marginRight: 4 }}>📷</span>
+                            <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-disabled)', marginRight: 4 }}>📷</span>
                             {images.map((img, i) => (
                                 <button
                                     key={i}
@@ -1216,7 +1215,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                             {/* Status text */}
                             <p style={{
-                                marginTop: 24, fontSize: 16, fontWeight: 700, color: '#0F172A',
+                                marginTop: 24, fontSize: 16, fontWeight: 700, color: 'var(--text-primary)',
                                 letterSpacing: '-0.01em',
                                 animation: 'fadeSlideUp 0.4s ease-out'
                             }}>
@@ -1236,7 +1235,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                             {/* Subtitle */}
                             <p style={{
-                                marginTop: 16, fontSize: 13, color: '#94A3B8', fontWeight: 500,
+                                marginTop: 16, fontSize: 13, color: 'var(--text-disabled)', fontWeight: 500,
                                 display: 'flex', alignItems: 'center', gap: 6
                             }}>
                                 <Lock style={{ width: 13, height: 13 }} />
@@ -1278,9 +1277,9 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                     <div style={{
                         padding: '8px 24px 16px', textAlign: 'center',
-                        fontSize: 13, color: '#94A3B8', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
+                        fontSize: 13, color: 'var(--text-disabled)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6
                     }}>
-                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#DBEAFE', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#2563EB', fontWeight: 700 }}>i</span>
+                        <span style={{ width: 14, height: 14, borderRadius: '50%', background: '#1E3A8A', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', fontSize: 9, color: '#2563EB', fontWeight: 700 }}>i</span>
                         Drag to reposition or use the toolbar to scale your photo
                     </div>
                 </div>
@@ -1292,17 +1291,17 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         <div style={{ marginBottom: 28 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
                                 <FileImage style={{ width: 20, height: 20, color: '#2563EB' }} />
-                                <h3 style={{ fontSize: 17, fontWeight: 700, color: '#0F172A' }}>Document Type</h3>
+                                <h3 style={{ fontSize: 17, fontWeight: 700, color: 'var(--text-primary)' }}>Document Type</h3>
                             </div>
 
-                            <label style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Select Document</label>
+                            <label style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted-dark)', textTransform: 'uppercase', letterSpacing: '0.08em', display: 'block', marginBottom: 8 }}>Select Document</label>
                             <select
                                 value={selectedDoc.id}
                                 onChange={handleDocChange}
                                 style={{
                                     width: '100%', padding: '10px 14px', borderRadius: 10,
-                                    border: '1px solid #E2E8F0', fontSize: 14, fontWeight: 500,
-                                    color: '#0F172A', background: '#fff', outline: 'none',
+                                    border: '1px solid var(--border-light)', fontSize: 14, fontWeight: 500,
+                                    color: 'var(--text-primary)', background: 'var(--bg-primary)', outline: 'none',
                                     cursor: 'pointer', marginBottom: 4
                                 }}
                             >
@@ -1310,20 +1309,20 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                     <option key={d.id} value={d.id}>{d.icon} {d.name} — {d.dims}</option>
                                 ))}
                             </select>
-                            <p style={{ fontSize: 12, color: '#94A3B8', marginBottom: 16 }}>
-                                Size: <strong style={{ color: '#0F172A' }}>{selectedDoc.dims}</strong>
+                            <p style={{ fontSize: 12, color: 'var(--text-disabled)', marginBottom: 16 }}>
+                                Size: <strong style={{ color: 'var(--text-primary)' }}>{selectedDoc.dims}</strong>
                             </p>
 
                             {/* Custom Size Inputs */}
                             {selectedDoc.id === 'custom' && (
                                 <div style={{
-                                    background: '#F8FAFC', borderRadius: 12, padding: 16,
-                                    border: '1px solid #E2E8F0', marginBottom: 8
+                                    background: 'var(--bg-secondary)', borderRadius: 12, padding: 16,
+                                    border: '1px solid var(--border-light)', marginBottom: 8
                                 }}>
-                                    <p style={{ fontSize: 12, fontWeight: 700, color: '#475569', marginBottom: 12 }}>Enter Custom Dimensions (mm)</p>
+                                    <p style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', marginBottom: 12 }}>Enter Custom Dimensions (mm)</p>
                                     <div style={{ display: 'flex', gap: 12 }}>
                                         <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: 11, color: '#94A3B8', display: 'block', marginBottom: 4 }}>Width</label>
+                                            <label style={{ fontSize: 11, color: 'var(--text-disabled)', display: 'block', marginBottom: 4 }}>Width</label>
                                             <input
                                                 type="number"
                                                 value={customWidth}
@@ -1332,14 +1331,14 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                                 max={200}
                                                 style={{
                                                     width: '100%', padding: '10px 12px', borderRadius: 8,
-                                                    border: '1px solid #E2E8F0', fontSize: 14, fontWeight: 600,
-                                                    color: '#0F172A', outline: 'none', textAlign: 'center'
+                                                    border: '1px solid var(--border-light)', fontSize: 14, fontWeight: 600,
+                                                    color: 'var(--text-primary)', outline: 'none', textAlign: 'center'
                                                 }}
                                             />
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 10, fontSize: 16, color: '#94A3B8', fontWeight: 700 }}>×</div>
+                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 10, fontSize: 16, color: 'var(--text-disabled)', fontWeight: 700 }}>×</div>
                                         <div style={{ flex: 1 }}>
-                                            <label style={{ fontSize: 11, color: '#94A3B8', display: 'block', marginBottom: 4 }}>Height</label>
+                                            <label style={{ fontSize: 11, color: 'var(--text-disabled)', display: 'block', marginBottom: 4 }}>Height</label>
                                             <input
                                                 type="number"
                                                 value={customHeight}
@@ -1348,12 +1347,12 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                                 max={200}
                                                 style={{
                                                     width: '100%', padding: '10px 12px', borderRadius: 8,
-                                                    border: '1px solid #E2E8F0', fontSize: 14, fontWeight: 600,
-                                                    color: '#0F172A', outline: 'none', textAlign: 'center'
+                                                    border: '1px solid var(--border-light)', fontSize: 14, fontWeight: 600,
+                                                    color: 'var(--text-primary)', outline: 'none', textAlign: 'center'
                                                 }}
                                             />
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 12, fontSize: 12, color: '#94A3B8', fontWeight: 600 }}>mm</div>
+                                        <div style={{ display: 'flex', alignItems: 'flex-end', paddingBottom: 12, fontSize: 12, color: 'var(--text-disabled)', fontWeight: 600 }}>mm</div>
                                     </div>
                                 </div>
                             )}
@@ -1363,16 +1362,16 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         <div style={{ marginBottom: 28 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
                                 <Sparkles style={{ width: 18, height: 18, color: '#8B5CF6' }} />
-                                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>AI Enhancements</h3>
+                                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>AI Enhancements</h3>
                             </div>
 
                             <div style={{
-                                padding: 14, borderRadius: 12, border: '1px solid #E2E8F0', background: '#FAFAFA', marginBottom: 12
+                                padding: 14, borderRadius: 12, border: '1px solid var(--border-light)', background: '#0D0D14', marginBottom: 12
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                     <div>
-                                        <p style={{ fontSize: 14, fontWeight: 600, color: '#0F172A' }}>Background Removal</p>
-                                        <p style={{ fontSize: 12, color: '#94A3B8' }}>AI removes background automatically</p>
+                                        <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)' }}>Background Removal</p>
+                                        <p style={{ fontSize: 12, color: 'var(--text-disabled)' }}>AI removes background automatically</p>
                                     </div>
                                     <div
                                         onClick={() => setBgRemoval(!bgRemoval)}
@@ -1386,10 +1385,10 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             {/* AI Engine Selector */}
                             {bgRemoval && (
                                 <div style={{
-                                    padding: 14, borderRadius: 12, border: '1px solid #E2E8F0', background: '#fff', marginBottom: 12,
+                                    padding: 14, borderRadius: 12, border: '1px solid var(--border-light)', background: 'var(--bg-primary)', marginBottom: 12,
                                     animation: 'fadeIn 0.3s ease'
                                 }}>
-                                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 10 }}>Processing Engine</p>
+                                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 10 }}>Processing Engine</p>
                                     <div style={{ display: 'flex', gap: 8 }}>
                                         <button
                                             onClick={() => setAiEngine('imgly')}
@@ -1429,12 +1428,12 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                             )}
                             {bgRemoval && (
                                 <div style={{
-                                    padding: 16, borderRadius: 12, border: '1px solid #E2E8F0',
-                                    background: '#FAFAFA', animation: 'fadeIn 0.3s ease'
+                                    padding: 16, borderRadius: 12, border: '1px solid var(--border-light)',
+                                    background: '#0D0D14', animation: 'fadeIn 0.3s ease'
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-                                        <Palette style={{ width: 16, height: 16, color: '#64748B' }} />
-                                        <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Background Color</p>
+                                        <Palette style={{ width: 16, height: 16, color: 'var(--text-muted-dark)' }} />
+                                        <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Background Color</p>
                                     </div>
 
                                     {/* Preset Colors */}
@@ -1471,7 +1470,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                                     {/* Custom Color Picker */}
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                        <label style={{ fontSize: 12, fontWeight: 600, color: '#64748B' }}>Custom:</label>
+                                        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted-dark)' }}>Custom:</label>
                                         <input
                                             type="color"
                                             value={bgColor}
@@ -1482,7 +1481,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                                 padding: 0, background: 'none'
                                             }}
                                         />
-                                        <span style={{ fontSize: 12, fontWeight: 600, color: '#94A3B8', fontFamily: 'monospace' }}>
+                                        <span style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-disabled)', fontFamily: 'monospace' }}>
                                             {bgColor.toUpperCase()}
                                         </span>
                                     </div>
@@ -1493,13 +1492,13 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         {/* Adjustments */}
                         <div style={{ marginBottom: 28 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                                <Sliders style={{ width: 18, height: 18, color: '#64748B' }} />
-                                <h3 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A' }}>Adjustments</h3>
+                                <Sliders style={{ width: 18, height: 18, color: 'var(--text-muted-dark)' }} />
+                                <h3 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)' }}>Adjustments</h3>
                             </div>
 
                             <div style={{ marginBottom: 20 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Brightness</span>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Brightness</span>
                                     <span style={{ fontSize: 12, fontWeight: 600, color: '#2563EB' }}>{brightness}%</span>
                                 </div>
                                 <input type="range" min={-50} max={50} value={brightness} onChange={e => setBrightness(Number(e.target.value))} />
@@ -1507,7 +1506,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
 
                             <div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                    <span style={{ fontSize: 12, fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contrast</span>
+                                    <span style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Contrast</span>
                                     <span style={{ fontSize: 12, fontWeight: 600, color: '#2563EB' }}>+{contrast}%</span>
                                 </div>
                                 <input type="range" min={-50} max={50} value={contrast} onChange={e => setContrast(Number(e.target.value))} />
@@ -1517,10 +1516,10 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         {/* Compliance Checklist */}
                         <div>
                             <div style={{
-                                background: '#F8FAFC', borderRadius: 12, padding: 16,
-                                border: '1px solid #E2E8F0'
+                                background: 'var(--bg-secondary)', borderRadius: 12, padding: 16,
+                                border: '1px solid var(--border-light)'
                             }}>
-                                <p style={{ fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Compliance Checklist</p>
+                                <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted-dark)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 14 }}>Compliance Checklist</p>
                                 {[
                                     { label: 'Face is centered', passed: true },
                                     { label: 'Lighting is even', passed: true },
@@ -1530,7 +1529,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                                         {item.passed ? (
                                             <CheckCircle style={{ width: 20, height: 20, color: '#22C55E', flexShrink: 0 }} />
                                         ) : (
-                                            <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid #CBD5E1', flexShrink: 0 }}></div>
+                                            <div style={{ width: 20, height: 20, borderRadius: '50%', border: '2px solid #374151', flexShrink: 0 }}></div>
                                         )}
                                         <span style={{ fontSize: 14, color: item.passed ? '#0F172A' : '#94A3B8', fontWeight: 500 }}>{item.label}</span>
                                     </div>
@@ -1540,7 +1539,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                     </div>
 
                     {/* Generate Button */}
-                    <div style={{ padding: 20, borderTop: '1px solid #E2E8F0', background: '#FAFAFA' }}>
+                    <div style={{ padding: 20, borderTop: '1px solid var(--border-light)', background: '#0D0D14' }}>
                         <button
                             onClick={handleProcess}
                             disabled={isProcessing}
@@ -1556,7 +1555,7 @@ export default function Editor({ images, onCancel, onOrder, onRemoveImage }) {
                         >
                             {isProcessing ? processingStatus || 'Processing...' : <>Generate Passport Photo <ArrowRight style={{ width: 18, height: 18 }} /></>}
                         </button>
-                        <p style={{ textAlign: 'center', fontSize: 11, color: '#94A3B8', marginTop: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        <p style={{ textAlign: 'center', fontSize: 11, color: 'var(--text-disabled)', marginTop: 10, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                             Compliant with ICAO Standards
                         </p>
                     </div>

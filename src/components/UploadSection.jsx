@@ -57,6 +57,7 @@ export default function UploadSection({ onUpload }) {
         <div>
             {/* Upload Drop Zone */}
             <div
+                className="upload-dropzone"
                 style={{
                     position: 'relative', cursor: 'pointer', display: 'flex', flexDirection: 'column',
                     alignItems: 'center', justifyContent: 'center', width: '100%', padding: '32px 16px',
@@ -87,10 +88,10 @@ export default function UploadSection({ onUpload }) {
                     <Upload style={{ width: 24, height: 24, color: '#2563EB' }} />
                 </div>
 
-                <p style={{ fontWeight: 600, fontSize: 16, color: '#0F172A', marginBottom: 4 }}>
+                <p style={{ fontWeight: 600, fontSize: 16, color: 'var(--text-primary)', marginBottom: 4 }}>
                     Upload Your Photos
                 </p>
-                <p style={{ fontSize: 13, color: '#94A3B8', marginBottom: 16 }}>
+                <p style={{ fontSize: 13, color: 'var(--text-disabled)', marginBottom: 16 }}>
                     Select up to {MAX_PHOTOS} photos — drag & drop or click to browse
                 </p>
 
@@ -111,9 +112,9 @@ export default function UploadSection({ onUpload }) {
                 <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
                     {['JPG', 'PNG', 'HEIC'].map(fmt => (
                         <span key={fmt} style={{
-                            fontSize: 11, fontWeight: 700, color: '#94A3B8',
-                            background: '#F8FAFC', padding: '2px 10px', borderRadius: 4,
-                            border: '1px solid #E2E8F0', letterSpacing: '0.05em'
+                            fontSize: 11, fontWeight: 700, color: 'var(--text-disabled)',
+                            background: 'var(--bg-secondary)', padding: '2px 10px', borderRadius: 4,
+                            border: '1px solid var(--border-light)', letterSpacing: '0.05em'
                         }}>{fmt}</span>
                     ))}
                 </div>
@@ -123,14 +124,14 @@ export default function UploadSection({ onUpload }) {
             {images.length > 0 && (
                 <div style={{ marginTop: 20 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                        <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>
+                        <p style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)' }}>
                             {images.length} / {MAX_PHOTOS} photos selected
                         </p>
                         {images.length < MAX_PHOTOS && (
                             <button
                                 onClick={(e) => { e.stopPropagation(); fileInputRef.current?.click(); }}
                                 style={{
-                                    background: 'none', border: '1px solid #E2E8F0', padding: '4px 12px',
+                                    background: 'none', border: '1px solid var(--border-light)', padding: '4px 12px',
                                     borderRadius: 8, fontSize: 12, fontWeight: 600, color: '#2563EB',
                                     cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4
                                 }}
@@ -140,11 +141,11 @@ export default function UploadSection({ onUpload }) {
                         )}
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+                    <div className="upload-image-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
                         {images.map((img, i) => (
                             <div key={i} style={{
                                 position: 'relative', borderRadius: 10, overflow: 'hidden',
-                                border: '2px solid #E2E8F0', aspectRatio: '3/4'
+                                border: '2px solid var(--border-light)', aspectRatio: '3/4'
                             }}>
                                 <img src={img} alt={`Photo ${i + 1}`} style={{
                                     width: '100%', height: '100%', objectFit: 'cover'

@@ -1,8 +1,21 @@
-import React, { useState } from 'react';
-import { Camera, Menu, X } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Camera, Menu, X, Sun, Moon } from 'lucide-react';
 
 const Header = ({ view, setView, setShowSupport, onLogin }) => {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const [isLight, setIsLight] = useState(() => {
+        return localStorage.getItem('theme') === 'light';
+    });
+
+    useEffect(() => {
+        if (isLight) {
+            document.body.classList.add('light');
+            localStorage.setItem('theme', 'light');
+        } else {
+            document.body.classList.remove('light');
+            localStorage.setItem('theme', 'dark');
+        }
+    }, [isLight]);
 
     const handleNavClick = (width, action) => {
         action();
@@ -13,7 +26,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
     return (
         <header style={{
             position: 'sticky', top: 0, zIndex: 50,
-            background: '#fff', borderBottom: '1px solid #F1F5F9',
+            background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-dark)',
             padding: '0 24px'
         }}>
             <div style={{ maxWidth: 1280, margin: '0 auto', display: 'flex', height: 72, alignItems: 'center', justifyContent: 'space-between' }}>
@@ -21,13 +34,13 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                     <div style={{ width: 36, height: 36, background: '#2563EB', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                         <Camera style={{ width: 20, height: 20 }} />
                     </div>
-                    <span style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>
+                    <span style={{ fontSize: 22, fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                         SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
                     </span>
                 </div>
 
                 {/* Desktop Nav */}
-                <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: '#64748B' }}>
+                <nav className="header-nav" style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted-dark)' }}>
                     {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
                         <a key={item} href="#" style={{
                             color: view === item.toLowerCase() || (item === 'Photo Guidelines' && view === 'guidelines') ? '#2563EB' : 'inherit',
@@ -52,9 +65,16 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
 
                 <div className="header-actions">
                     <button
+                        onClick={() => setIsLight(!isLight)}
+                        title="Toggle Theme"
+                        style={{ background: 'none', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', marginRight: '8px' }}
+                    >
+                        {isLight ? <Moon size={20} /> : <Sun size={20} />}
+                    </button>
+                    <button
                         className="login-btn"
                         onClick={onLogin}
-                        style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: '#475569', cursor: 'pointer' }}
+                        style={{ background: 'none', border: 'none', fontSize: 14, fontWeight: 500, color: 'var(--text-muted)', cursor: 'pointer' }}
                     >
                         Login
                     </button>
@@ -62,7 +82,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                     <button
                         className="mobile-menu-btn"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: '#0F172A' }}
+                        style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-primary)' }}
                     >
                         {mobileMenuOpen ? <X /> : <Menu />}
                     </button>
@@ -73,14 +93,15 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
             {mobileMenuOpen && (
                 <div style={{
                     position: 'absolute', top: 72, left: 0, right: 0,
-                    background: '#fff', borderBottom: '1px solid #E2E8F0',
+                    background: 'var(--bg-primary)', borderBottom: '1px solid var(--border-light)',
                     padding: '24px', display: 'flex', flexDirection: 'column', gap: 24,
-                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)'
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+                    zIndex: 100
                 }}>
                     {['Home', 'Pricing', 'Photo Guidelines', 'Support'].map(item => (
                         <a key={item} href="#" style={{
                             fontSize: 16, fontWeight: 600,
-                            color: view === item.toLowerCase() || (item === 'Photo Guidelines' && view === 'guidelines') ? '#2563EB' : '#0F172A',
+                            color: view === item.toLowerCase() || (item === 'Photo Guidelines' && view === 'guidelines') ? '#2563EB' : 'var(--text-primary)',
                             textDecoration: 'none'
                         }}
                             onClick={(e) => {
@@ -101,7 +122,7 @@ const Header = ({ view, setView, setShowSupport, onLogin }) => {
                             setMobileMenuOpen(false);
                         }}
                         style={{
-                            background: '#EFF6FF', border: 'none', padding: '12px',
+                            background: 'var(--bg-accent-dark)', border: 'none', padding: '12px',
                             borderRadius: 8, fontSize: 15, fontWeight: 600, color: '#2563EB',
                             cursor: 'pointer', width: '100%', textAlign: 'center'
                         }}

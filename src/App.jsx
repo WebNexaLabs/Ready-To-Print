@@ -146,7 +146,7 @@ function App() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column', fontFamily: "'Inter', system-ui, sans-serif" }}>
       {/* Header */}
       <Header view={view} setView={setView} setShowSupport={setShowSupport} onLogin={() => setView('login')} />
 
@@ -157,17 +157,17 @@ function App() {
           <div style={{ flex: 1, maxWidth: 560 }}>
 
 
-            <h1 style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1, color: '#0F172A', marginBottom: 20, letterSpacing: '-0.03em' }}>
+            <h1 style={{ fontSize: 48, fontWeight: 900, lineHeight: 1.1, color: 'var(--text-primary)', marginBottom: 20, letterSpacing: '-0.03em' }}>
               Perfect Passport<br />Photos <span style={{ color: '#2563EB' }}>in 30s.</span>
             </h1>
 
-            <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.7, marginBottom: 32, maxWidth: 460 }}>
+            <p style={{ fontSize: 16, color: 'var(--text-muted-dark)', lineHeight: 1.7, marginBottom: 32, maxWidth: 460 }}>
               Generate compliant photos for Passport, PAN, Aadhaar, and Govt Job Applications with AI-powered biometric verification, designed to meet approved photo specifications and recognized document requirements.
             </p>
 
             <div style={{
-              background: '#fff', padding: 8, borderRadius: 24,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.08)', border: '1px solid #F1F5F9'
+              background: 'var(--bg-primary)', padding: 8, borderRadius: 24,
+              boxShadow: '0 20px 60px rgba(0,0,0,0.4)', border: '1px solid var(--border-dark)'
             }}>
               <UploadSection onUpload={handleUpload} />
             </div>
@@ -177,15 +177,15 @@ function App() {
                 {[1, 2, 3].map(i => (
                   <div key={i} style={{
                     width: 32, height: 32, borderRadius: '50%',
-                    background: '#E2E8F0', border: '2px solid #fff',
+                    background: '#27273A', border: '2px solid #fff',
                     marginLeft: i > 1 ? -10 : 0, display: 'flex',
                     alignItems: 'center', justifyContent: 'center',
-                    fontSize: 10, fontWeight: 700, color: '#64748B'
+                    fontSize: 10, fontWeight: 700, color: 'var(--text-muted-dark)'
                   }}>U{i}</div>
                 ))}
               </div>
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#475569' }}>
-                <strong style={{ color: '#0F172A' }}>50,000+</strong> Indian citizens trust us
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--text-muted)' }}>
+                <strong style={{ color: 'var(--text-primary)' }}>50,000+</strong> Indian citizens trust us
               </span>
             </div>
           </div>
@@ -193,8 +193,8 @@ function App() {
           {/* Right: Visualizer */}
           <div style={{ flex: 1, maxWidth: 520, display: 'none' }} className="hero-right">
             <div style={{
-              background: '#fff', borderRadius: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.08)',
-              border: '1px solid #F1F5F9', padding: 28, position: 'relative', overflow: 'hidden'
+              background: 'var(--bg-primary)', borderRadius: 24, boxShadow: '0 20px 60px rgba(0,0,0,0.4)',
+              border: '1px solid var(--border-dark)', padding: 28, position: 'relative', overflow: 'hidden'
             }}>
               <div style={{ position: 'absolute', top: 20, right: 24, display: 'flex', gap: 6 }}>
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#F87171' }}></div>
@@ -202,7 +202,7 @@ function App() {
                 <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#34D399' }}></div>
               </div>
 
-              <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>
+              <p style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-disabled)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 20 }}>
                 Passport Photo AI Validation
               </p>
 
@@ -223,24 +223,24 @@ function App() {
                       {i === 1 && <Scissors style={{ width: 24, height: 24, color: '#3B82F6' }} />}
                       {i === 2 && <ShieldCheck style={{ width: 24, height: 24, color: '#22C55E' }} />}
                     </div>
-                    <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: '#64748B' }}>{s.label}</p>
+                    <p style={{ textAlign: 'center', fontSize: 11, fontWeight: 600, color: 'var(--text-muted-dark)' }}>{s.label}</p>
                   </div>
                 ))}
               </div>
 
               <div style={{
-                background: '#F8FAFC', borderRadius: 12, padding: 14,
+                background: 'var(--bg-secondary)', borderRadius: 12, padding: 14,
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                border: '1px solid #F1F5F9'
+                border: '1px solid var(--border-dark)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div>
-                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Passport Photo</p>
-                    <p style={{ fontSize: 11, color: '#94A3B8' }}>35mm × 45mm • White Background</p>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: 'var(--text-primary)' }}>Passport Photo</p>
+                    <p style={{ fontSize: 11, color: 'var(--text-disabled)' }}>35mm × 45mm • White Background</p>
                   </div>
                 </div>
                 <div style={{
-                  background: '#DCFCE7', color: '#15803D', fontSize: 11, fontWeight: 700,
+                  background: '#064E3B', color: '#15803D', fontSize: 11, fontWeight: 700,
                   padding: '4px 10px', borderRadius: 6, display: 'flex', alignItems: 'center', gap: 4
                 }}>
                   <CheckCircle style={{ width: 12, height: 12 }} /> 99.9%
@@ -252,7 +252,7 @@ function App() {
       </section>
 
       {/* Features */}
-      <section style={{ padding: '60px 24px', background: '#fff', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
+      <section style={{ padding: '60px 24px', background: 'var(--bg-primary)', maxWidth: 1280, margin: '0 auto', width: '100%' }}>
         <div className="features-grid">
           {[
             { icon: '✨', title: 'Instant BG Removal', desc: 'Convert any background to official white or white in two clicks.' },
@@ -262,42 +262,42 @@ function App() {
           ].map((f, i) => (
             <div key={i} style={{ textAlign: 'center', padding: 8 }}>
               <div style={{
-                width: 56, height: 56, margin: '0 auto 16px', background: '#EFF6FF',
+                width: 56, height: 56, margin: '0 auto 16px', background: 'var(--bg-accent-dark)',
                 borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 28
               }}>{f.icon}</div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#0F172A', marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ fontSize: 13, color: '#64748B', lineHeight: 1.6 }}>{f.desc}</p>
+              <h3 style={{ fontSize: 16, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 8 }}>{f.title}</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted-dark)', lineHeight: 1.6 }}>{f.desc}</p>
             </div>
           ))}
         </div>
       </section>
 
       {/* Document Type Selection */}
-      <section style={{ padding: '60px 24px', background: '#F8FAFC' }}>
+      <section style={{ padding: '60px 24px', background: 'var(--bg-secondary)' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div style={{ textAlign: 'center', maxWidth: 600, margin: '0 auto 48px' }}>
-            <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', marginBottom: 12 }}>Select Your Document Type</h2>
-            <p style={{ fontSize: 14, color: '#64748B' }}>Choose Indian Passport size or enter custom dimensions for any document.</p>
+            <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 12 }}>Select Your Document Type</h2>
+            <p style={{ fontSize: 14, color: 'var(--text-muted-dark)' }}>Choose Indian Passport size or enter custom dimensions for any document.</p>
           </div>
 
           <div className="doc-type-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 20, maxWidth: 700, margin: '0 auto' }}>
             {documentTypes.map((doc) => (
               <div key={doc.id} style={{
-                background: '#fff', padding: 24, borderRadius: 16,
-                border: '1px solid #E2E8F0', cursor: 'pointer',
+                background: 'var(--bg-primary)', padding: 24, borderRadius: 16,
+                border: '1px solid var(--border-light)', cursor: 'pointer',
                 transition: 'all 0.2s', display: 'flex', alignItems: 'center', gap: 16
               }}
                 onMouseEnter={e => { e.currentTarget.style.borderColor = '#3B82F6'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(37,99,235,0.1)'; }}
                 onMouseLeave={e => { e.currentTarget.style.borderColor = '#E2E8F0'; e.currentTarget.style.boxShadow = 'none'; }}
               >
                 <div style={{
-                  width: 48, height: 48, borderRadius: 12, background: '#EFF6FF',
+                  width: 48, height: 48, borderRadius: 12, background: 'var(--bg-accent-dark)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0
                 }}>{doc.icon}</div>
                 <div>
-                  <h4 style={{ fontSize: 15, fontWeight: 700, color: '#0F172A', marginBottom: 2 }}>{doc.name}</h4>
-                  <p style={{ fontSize: 11, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{doc.dims}</p>
+                  <h4 style={{ fontSize: 15, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 2 }}>{doc.name}</h4>
+                  <p style={{ fontSize: 11, color: 'var(--text-disabled)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.03em' }}>{doc.dims}</p>
                 </div>
               </div>
             ))}
@@ -333,7 +333,7 @@ function App() {
                 <button
                   onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
                   style={{
-                    background: '#fff', color: '#2563EB', border: 'none',
+                    background: 'var(--bg-primary)', color: '#2563EB', border: 'none',
                     padding: '14px 32px', borderRadius: 12, fontWeight: 700, fontSize: 14,
                     cursor: 'pointer', boxShadow: '0 4px 14px rgba(0,0,0,0.15)'
                   }}
@@ -352,7 +352,7 @@ function App() {
       </section>
 
       {/* Footer */}
-      <footer style={{ background: '#F8FAFC', borderTop: '1px solid #E2E8F0', padding: '60px 24px 32px' }}>
+      <footer style={{ background: 'var(--bg-secondary)', borderTop: '1px solid var(--border-light)', padding: '60px 24px 32px' }}>
         <div style={{ maxWidth: 1280, margin: '0 auto' }}>
           <div className="footer-grid">
             <div>
@@ -360,11 +360,11 @@ function App() {
                 <div style={{ width: 32, height: 32, background: '#2563EB', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
                   <Camera style={{ width: 16, height: 16 }} />
                 </div>
-                <span style={{ fontSize: 18, fontWeight: 800, color: '#0F172A' }}>
+                <span style={{ fontSize: 18, fontWeight: 800, color: 'var(--text-primary)' }}>
                   SelfieSe<span style={{ color: '#2563EB' }}>Passport</span>
                 </span>
               </div>
-              <p style={{ fontSize: 13, color: '#64748B', maxWidth: 280, lineHeight: 1.7, marginBottom: 16 }}>
+              <p style={{ fontSize: 13, color: 'var(--text-muted-dark)', maxWidth: 280, lineHeight: 1.7, marginBottom: 16 }}>
                 Trusted biometric photo processor built to meet official document standards.
               </p>
 
@@ -374,7 +374,7 @@ function App() {
               { title: 'Quick Links', links: ['Pricing', 'Refund Policy', 'Contact Support', 'Privacy Policy', 'Terms of Service'] }
             ].map((col, i) => (
               <div key={i}>
-                <h4 style={{ fontSize: 11, fontWeight: 700, color: '#0F172A', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>{col.title}</h4>
+                <h4 style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-primary)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 20 }}>{col.title}</h4>
                 <ul style={{ listStyle: 'none', padding: 0 }}>
                   {col.links.map(link => (
                     <li key={link} style={{ marginBottom: 12 }}>
@@ -395,7 +395,7 @@ function App() {
                             setShowRefund(true);
                           }
                         }}
-                        style={{ fontSize: 13, color: '#64748B', textDecoration: 'none' }}
+                        style={{ fontSize: 13, color: 'var(--text-muted-dark)', textDecoration: 'none' }}
                         onMouseEnter={e => e.target.style.color = '#2563EB'}
                         onMouseLeave={e => e.target.style.color = '#64748B'}
                       >{link}</a>
@@ -407,11 +407,11 @@ function App() {
           </div>
 
           <div className="footer-bottom" style={{
-            borderTop: '1px solid #E2E8F0', paddingTop: 20,
-            fontSize: 12, color: '#94A3B8'
+            borderTop: '1px solid var(--border-light)', paddingTop: 20,
+            fontSize: 12, color: 'var(--text-disabled)'
           }}>
             <p>©2026 SelfieSePassport. Professional document photo services.</p>
-            <div style={{ display: 'flex', gap: 16 }}>
+            <div className="footer-badges" style={{ display: 'flex', gap: 16 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Lock style={{ width: 14, height: 14, color: '#22C55E' }} /> SSL Encrypted
               </span>

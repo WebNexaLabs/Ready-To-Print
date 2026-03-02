@@ -52,14 +52,14 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
     ];
 
     return (
-        <div style={{ minHeight: '100vh', background: '#F8FAFC', fontFamily: "'Inter', sans-serif", paddingBottom: 80 }}>
+        <div style={{ minHeight: '100vh', background: 'var(--bg-secondary)', fontFamily: "'Inter', sans-serif", paddingBottom: 80 }}>
             {/* Header */}
-            <div className="pricing-header" style={{ background: '#EFF6FF', padding: '60px 24px 40px', textAlign: 'center' }}>
+            <div className="pricing-header" style={{ background: 'var(--bg-accent-dark)', padding: '60px 24px 40px', textAlign: 'center' }}>
                 <div style={{ maxWidth: 800, margin: '0 auto' }}>
-                    <h1 style={{ fontSize: 36, fontWeight: 800, color: '#0F172A', marginBottom: 16 }}>
+                    <h1 style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-primary)', marginBottom: 16 }}>
                         Professional Prints, <span style={{ color: '#2563EB' }}>Delivered to Your Doorstep</span>
                     </h1>
-                    <p style={{ fontSize: 16, color: '#64748B', lineHeight: 1.6, maxWidth: 600, margin: '0 auto' }}>
+                    <p style={{ fontSize: 16, color: 'var(--text-muted-dark)', lineHeight: 1.6, maxWidth: 600, margin: '0 auto' }}>
                         Premium quality passport and document photos printed on high-grade photo paper. Pan-India delivery within 3-5 business days.
                     </p>
                 </div>
@@ -69,20 +69,20 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
             <div className="pricing-cards-grid" style={{ maxWidth: 1000, margin: '-20px auto 60px', padding: '0 24px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24 }}>
 
                 {/* Standard Plan */}
-                <div style={{ background: '#fff', borderRadius: 24, padding: 32, border: '1px solid #E2E8F0', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ background: 'var(--bg-primary)', borderRadius: 24, padding: 32, border: '1px solid var(--border-light)', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', display: 'flex', flexDirection: 'column' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                         <div>
-                            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A' }}>Standard Sheet</h3>
-                            <span style={{ fontSize: 12, fontWeight: 600, background: '#F1F5F9', color: '#475569', padding: '4px 10px', borderRadius: 999 }}>4" × 6" Photo Paper</span>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>Standard Sheet</h3>
+                            <span style={{ fontSize: 12, fontWeight: 600, background: 'var(--bg-tertiary)', color: 'var(--text-muted)', padding: '4px 10px', borderRadius: 999 }}>4" × 6" Photo Paper</span>
                         </div>
-                        <Printer style={{ color: '#94A3B8', width: 24, height: 24 }} />
+                        <Printer style={{ color: 'var(--text-disabled)', width: 24, height: 24 }} />
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 36, fontWeight: 800, color: '#0F172A' }}>₹64</span>
-                        <span style={{ fontSize: 16, color: '#94A3B8', textDecoration: 'line-through' }}>₹99</span>
+                        <span style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-primary)' }}>₹64</span>
+                        <span style={{ fontSize: 16, color: 'var(--text-disabled)', textDecoration: 'line-through' }}>₹99</span>
                     </div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#64748B', marginBottom: 24, letterSpacing: '0.05em', textTransform: 'uppercase' }}>₹49 Printing + ₹15 Shipping</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted-dark)', marginBottom: 24, letterSpacing: '0.05em', textTransform: 'uppercase' }}>₹49 Printing + ₹15 Shipping</p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
                         {standardFeatures.map((feat, i) => (
@@ -90,7 +90,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                                 <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#2563EB', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <Check style={{ width: 12, height: 12, color: '#fff' }} />
                                 </div>
-                                <span style={{ fontSize: 14, color: '#334155', fontWeight: 500 }}>{feat}</span>
+                                <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 500 }}>{feat}</span>
                             </div>
                         ))}
                     </div>
@@ -111,17 +111,17 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                 </div>
 
                 {/* Professional Plan */}
-                <div style={{ background: '#fff', borderRadius: 24, padding: 32, border: '2px solid #CA8A04', boxShadow: '0 10px 30px -5px rgba(202, 138, 4, 0.15)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ background: 'var(--bg-primary)', borderRadius: 24, padding: 32, border: '2px solid #CA8A04', boxShadow: '0 10px 30px -5px rgba(202, 138, 4, 0.15)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                     <div style={{
                         position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)',
                         background: '#CA8A04', color: '#fff', padding: '6px 16px', borderRadius: 999,
-                        fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 6px rgba(0,0,0,0.6)',
                         whiteSpace: 'nowrap'
                     }}>Best Value Option</div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                         <div>
-                            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A' }}>Professional Sheet</h3>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>Professional Sheet</h3>
                             <span style={{ fontSize: 12, fontWeight: 600, background: '#FEF9C3', color: '#854D0E', padding: '4px 10px', borderRadius: 999 }}>Full A4 Sheet</span>
                         </div>
                         <div style={{ width: 32, height: 32, background: '#FEF9C3', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -130,10 +130,10 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 36, fontWeight: 800, color: '#0F172A' }}>₹99</span>
-                        <span style={{ fontSize: 16, color: '#94A3B8', textDecoration: 'line-through' }}>₹199</span>
+                        <span style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-primary)' }}>₹99</span>
+                        <span style={{ fontSize: 16, color: 'var(--text-disabled)', textDecoration: 'line-through' }}>₹199</span>
                     </div>
-                    <p style={{ fontSize: 12, fontWeight: 600, color: '#64748B', marginBottom: 24, letterSpacing: '0.05em', textTransform: 'uppercase' }}>₹84 Printing + ₹15 Shipping</p>
+                    <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--text-muted-dark)', marginBottom: 24, letterSpacing: '0.05em', textTransform: 'uppercase' }}>₹84 Printing + ₹15 Shipping</p>
 
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 32 }}>
                         {professionalFeatures.map((feat, i) => (
@@ -141,7 +141,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                                 <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#CA8A04', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <Check style={{ width: 12, height: 12, color: '#fff' }} />
                                 </div>
-                                <span style={{ fontSize: 14, color: '#334155', fontWeight: feat.bold ? 700 : 500, fontStyle: feat.bold ? 'italic' : 'normal' }}>{feat.text}</span>
+                                <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: feat.bold ? 700 : 500, fontStyle: feat.bold ? 'italic' : 'normal' }}>{feat.text}</span>
                             </div>
                         ))}
                     </div>
@@ -152,7 +152,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     <button
                         onClick={onOrder}
                         style={{
-                            marginTop: 'auto', width: '100%', padding: '16px', background: '#0F172A', color: '#fff',
+                            marginTop: 'auto', width: '100%', padding: '16px', background: 'var(--bg-accent-dark)', color: '#fff',
                             border: 'none', borderRadius: 12, fontSize: 15, fontWeight: 700,
                             cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                             boxShadow: '0 4px 12px rgba(15, 23, 42, 0.3)'
@@ -163,17 +163,17 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                 </div>
 
                 {/* Unlimited Digital Plan */}
-                <div style={{ background: '#fff', borderRadius: 24, padding: 32, border: '2px solid #7C3AED', boxShadow: '0 10px 30px -5px rgba(124, 58, 237, 0.15)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
+                <div style={{ background: 'var(--bg-primary)', borderRadius: 24, padding: 32, border: '2px solid #7C3AED', boxShadow: '0 10px 30px -5px rgba(124, 58, 237, 0.15)', position: 'relative', display: 'flex', flexDirection: 'column' }}>
                     <div style={{
                         position: 'absolute', top: 0, left: '50%', transform: 'translate(-50%, -50%)',
                         background: 'linear-gradient(135deg, #7C3AED, #4F46E5)', color: '#fff', padding: '6px 16px', borderRadius: 999,
-                        fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                        fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', boxShadow: '0 4px 6px rgba(0,0,0,0.6)',
                         whiteSpace: 'nowrap'
                     }}>Limited Time Offer</div>
 
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
                         <div>
-                            <h3 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A' }}>Unlimited Digital Print</h3>
+                            <h3 style={{ fontSize: 20, fontWeight: 700, color: 'var(--text-primary)' }}>Unlimited Digital Print</h3>
                             <span style={{ fontSize: 12, fontWeight: 600, background: '#F3E8FF', color: '#7C3AED', padding: '4px 10px', borderRadius: 999 }}>Subscription Model</span>
                         </div>
                         <div style={{ width: 32, height: 32, background: '#F3E8FF', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -182,8 +182,8 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     </div>
 
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-                        <span style={{ fontSize: 36, fontWeight: 800, color: '#0F172A' }}>₹199</span>
-                        <span style={{ fontSize: 16, color: '#94A3B8', textDecoration: 'line-through' }}>₹499</span>
+                        <span style={{ fontSize: 36, fontWeight: 800, color: 'var(--text-primary)' }}>₹199</span>
+                        <span style={{ fontSize: 16, color: 'var(--text-disabled)', textDecoration: 'line-through' }}>₹499</span>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 24 }}>
                         <Clock style={{ width: 14, height: 14, color: '#7C3AED' }} />
@@ -196,7 +196,7 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                                 <div style={{ width: 20, height: 20, borderRadius: '50%', background: '#F3E8FF', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                     <feat.icon style={{ width: 12, height: 12, color: '#7C3AED' }} />
                                 </div>
-                                <span style={{ fontSize: 14, color: '#334155', fontWeight: 500 }}>{feat.text}</span>
+                                <span style={{ fontSize: 14, color: 'var(--text-tertiary)', fontWeight: 500 }}>{feat.text}</span>
                             </div>
                         ))}
                     </div>
@@ -217,13 +217,13 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
 
             {/* Compare Plans */}
             <div style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px' }}>
-                <h2 style={{ fontSize: 28, fontWeight: 800, color: '#0F172A', textAlign: 'center', marginBottom: 40 }}>Compare Plans</h2>
+                <h2 style={{ fontSize: 28, fontWeight: 800, color: 'var(--text-primary)', textAlign: 'center', marginBottom: 40 }}>Compare Plans</h2>
 
-                <div style={{ background: '#fff', borderRadius: 16, border: '1px solid #E2E8F0', overflowX: 'auto' }}>
+                <div className="pricing-compare-table" style={{ background: 'var(--bg-primary)', borderRadius: 16, border: '1px solid var(--border-light)', overflowX: 'auto' }}>
                     <div style={{ minWidth: 600 }}>
                         {/* Header Row */}
-                        <div style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: '1px solid #E2E8F0', background: '#F8FAFC' }}>
-                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Features</div>
+                        <div className="table-header" style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: '1px solid var(--border-light)', background: 'var(--bg-secondary)' }}>
+                            <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 700, color: 'var(--text-muted-dark)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Features</div>
                             <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#2563EB', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Standard (4x6)</div>
                             <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#CA8A04', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Professional (A4)</div>
                             <div style={{ padding: '16px 24px', fontSize: 12, fontWeight: 800, color: '#7C3AED', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Unlimited Digital</div>
@@ -237,9 +237,9 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                             { label: 'Delivery Method', standard: '3-5 Days', prof: 'Express Delivery', colorProf: '#16A34A', unlim: 'Instant Access', colorUnlim: '#7C3AED', boldUnlim: true },
                             { label: 'Support Priority', standard: 'Regular', prof: 'Priority Support', unlim: 'VIP Priority', boldUnlim: true }
                         ].map((row, i) => (
-                            <div key={i} style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: i === 4 ? 'none' : '1px solid #F1F5F9' }}>
-                                <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: 500, color: '#334155' }}>{row.label}</div>
-                                <div style={{ padding: '20px 24px', fontSize: 14, color: '#475569' }}>{row.standard}</div>
+                            <div key={i} className="table-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(140px, 1fr) 1fr 1fr 1fr', borderBottom: i === 4 ? 'none' : '1px solid #F1F5F9' }}>
+                                <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: 500, color: 'var(--text-tertiary)' }}>{row.label}</div>
+                                <div style={{ padding: '20px 24px', fontSize: 14, color: 'var(--text-muted)' }}>{row.standard}</div>
                                 <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldProf ? 700 : 400, color: row.colorProf || '#0F172A' }}>{row.prof}</div>
                                 <div style={{ padding: '20px 24px', fontSize: 14, fontWeight: row.boldUnlim ? 700 : 400, color: row.colorUnlim || '#0F172A' }}>{row.unlim}</div>
                             </div>
@@ -257,30 +257,30 @@ const Pricing = ({ onOrder, onNavigate, onSupport, onUpgrade }) => {
                     { icon: ShieldCheck, title: 'Privacy First', desc: 'Auto-deleted in 24h' }
                 ].map((item, i) => (
                     <div key={i}>
-                        <div style={{ width: 48, height: 48, borderRadius: '50%', background: '#EFF6FF', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                        <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'var(--bg-accent-dark)', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                             <item.icon style={{ color: '#2563EB', width: 24, height: 24 }} />
                         </div>
-                        <h3 style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>{item.title}</h3>
-                        <p style={{ fontSize: 12, color: '#64748B' }}>{item.desc}</p>
+                        <h3 style={{ fontSize: 14, fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>{item.title}</h3>
+                        <p style={{ fontSize: 12, color: 'var(--text-muted-dark)' }}>{item.desc}</p>
                     </div>
                 ))}
             </div>
 
             {/* Footer styled bottom links */}
-            <footer style={{ background: '#0F172A', marginTop: 80, padding: '40px 24px' }}>
-                <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
+            <footer style={{ background: 'var(--bg-accent-dark)', marginTop: 80, padding: '40px 24px' }}>
+                <div className="pricing-footer-inner" style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 20 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <Camera style={{ color: '#fff', width: 20, height: 20 }} />
                         <span style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>SelfieSePassport</span>
                     </div>
-                    <div style={{ display: 'flex', gap: 24, fontSize: 13, color: '#94A3B8' }}>
+                    <div className="pricing-footer-links" style={{ display: 'flex', gap: 24, fontSize: 13, color: 'var(--text-disabled)' }}>
                         <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('privacy'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Privacy Policy</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('terms'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Terms of Service</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); onNavigate('guidelines'); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Photo Guidelines</a>
                         <a href="#" onClick={(e) => { e.preventDefault(); onSupport(); }} style={{ color: 'inherit', textDecoration: 'none', cursor: 'pointer' }}>Contact Support</a>
                     </div>
                 </div>
-                <div style={{ maxWidth: 1200, margin: '40px auto 0', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, textAlign: 'center', fontSize: 12, color: '#64748B' }}>
+                <div style={{ maxWidth: 1200, margin: '40px auto 0', borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 24, textAlign: 'center', fontSize: 12, color: 'var(--text-muted-dark)' }}>
                     ©2026 SelfieSePassport. Professional document photo services.
                 </div>
             </footer>
