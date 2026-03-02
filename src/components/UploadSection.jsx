@@ -123,7 +123,7 @@ export default function UploadSection({ onUpload, onShowQR }) {
                 {onShowQR && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 18, width: '100%', maxWidth: 280 }}>
                         <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
-                        <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-disabled)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>or</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--text-disabled)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>or</span>
                         <div style={{ flex: 1, height: 1, background: 'var(--border-light)' }} />
                     </div>
                 )}
@@ -133,16 +133,19 @@ export default function UploadSection({ onUpload, onShowQR }) {
                     <button
                         onClick={(e) => { e.stopPropagation(); onShowQR(); }}
                         style={{
-                            marginTop: 12, background: 'transparent', color: '#2563EB',
-                            border: '1.5px solid #2563EB', padding: '9px 24px', borderRadius: 999,
+                            marginTop: 12,
+                            background: 'var(--primary-50)',
+                            color: '#2563EB',
+                            border: '1px solid var(--primary-100)',
+                            padding: '9px 22px', borderRadius: 999,
                             fontWeight: 600, fontSize: 13, cursor: 'pointer',
-                            display: 'flex', alignItems: 'center', gap: 8,
+                            display: 'flex', alignItems: 'center', gap: 7,
                             transition: 'all 0.2s'
                         }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(37,99,235,0.08)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; }}
+                        onMouseEnter={e => { e.currentTarget.style.background = 'var(--primary-100)'; e.currentTarget.style.borderColor = 'var(--primary-200)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.background = 'var(--primary-50)'; e.currentTarget.style.borderColor = 'var(--primary-100)'; }}
                     >
-                        <Smartphone style={{ width: 15, height: 15 }} />
+                        <Smartphone style={{ width: 14, height: 14 }} />
                         Upload from Phone
                     </button>
                 )}
