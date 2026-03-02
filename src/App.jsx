@@ -348,7 +348,7 @@ function App() {
             borderTop: '1px solid var(--border-light)', paddingTop: 20,
             fontSize: 12, color: 'var(--text-disabled)'
           }}>
-            <p>©2026 SelfieSePassport. Professional document photo services.</p>
+            <p>©2026 Copyright <a href="https://www.webnexalabs.dev/" target="_blank" rel="noopener noreferrer" style={{ color: '#2563EB', fontWeight: 700, textDecoration: 'none' }}>WebNexaLabs</a></p>
             <div className="footer-badges" style={{ display: 'flex', gap: 16 }}>
               <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
                 <Lock style={{ width: 14, height: 14, color: '#22C55E' }} /> SSL Encrypted
