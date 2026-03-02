@@ -1,50 +1,27 @@
 # Ready To Print
 
-Ready To Print is a React + Vite app for preparing printable photos.
+Ready To Print helps users prepare photos that are ready for printing.
 
-## Local development
+## What it does
 
-1. Install dependencies:
+- Upload photos
+- Adjust and prepare photos for print
+- Export print-ready output
 
-	```bash
-	npm install
-	```
+## How to use
 
-2. Start dev server:
+1. Open the app.
+2. Upload your photo.
+3. Follow the on-screen steps to prepare it for printing.
+4. Export or download the final result.
 
-	```bash
-	npm run dev
-	```
+## Deploy
 
-3. Build production bundle:
+This project is configured for deployment on Vercel.
 
-	```bash
-	npm run build
-	```
-
-## Deploy on Vercel
-
-This repository now includes `vercel.json` with:
-
-- `buildCommand`: `npm run build`
-- `outputDirectory`: `dist`
-- SPA rewrite rule to `index.html`
-
-### Option 1: Vercel dashboard
-
-1. Push this repo to GitHub.
-2. In Vercel, click **Add New Project** and import the repo.
-3. Framework preset: **Vite** (or leave auto-detected).
-4. Keep default build settings (already defined in `vercel.json`).
-5. Deploy.
-
-### Option 2: Vercel CLI
-
-```bash
-npm i -g vercel
-vercel
-vercel --prod
-```
+1. Push this repository to GitHub.
+2. Import it into Vercel.
+3. Click deploy.
 
 ## License
 
