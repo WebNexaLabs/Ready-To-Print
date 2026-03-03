@@ -45,11 +45,11 @@ export const generatePhotoSheet = async (imageSources, docType, pageSize = PAGE_
 
     // Minimum photos target per page size
     const MIN_PHOTOS = pageSize.minPhotos || 10;
-    const GAP = 16;
-    const BORDER = 3;
-    const MARGIN = 12;
-    const usableW = pageSize.widthPx - MARGIN * 2;
-    const usableH = pageSize.heightPx - MARGIN * 2;
+    const LAYOUT_GAP = 16;   // Used for layout calculation only (keeps photo size & count unchanged)
+    const BORDER = 1;
+    const LAYOUT_MARGIN = 12; // Used for layout calculation only
+    const usableW = pageSize.widthPx - LAYOUT_MARGIN * 2;
+    const usableH = pageSize.heightPx - LAYOUT_MARGIN * 2;
 
     // Try to fit at least MIN_PHOTOS by scaling down if needed
     let photoWidthPx = basePhotoW;
@@ -65,16 +65,27 @@ export const generatePhotoSheet = async (imageSources, docType, pageSize = PAGE_
 
     // Iteratively scale down until we hit the minimum photo count
     for (let attempt = 0; attempt < 20; attempt++) {
-        cols = Math.floor((usableW + GAP) / (photoWidthPx + GAP));
-        rows = Math.floor((usableH + GAP) / (photoHeightPx + GAP));
+        cols = Math.floor((usableW + LAYOUT_GAP) / (photoWidthPx + LAYOUT_GAP));
+        rows = Math.floor((usableH + LAYOUT_GAP) / (photoHeightPx + LAYOUT_GAP));
         if (cols * rows >= MIN_PHOTOS) break;
         photoWidthPx = Math.round(photoWidthPx * 0.95);
         photoHeightPx = Math.round(photoHeightPx * 0.95);
     }
 
+    // Distribute spacing: gap = 2 * margin (the user's V / 2V rule)
+    // Total horizontal space: marginX + cols*photoW + (cols-1)*gapX + marginX = pageWidth
+    // With gapX = 2*marginX:  marginX*(2 + 2*(cols-1)) + cols*photoW = pageWidth
+    //                          marginX*(2*cols) + cols*photoW = pageWidth
+    const marginX = cols > 0 ? Math.floor((pageSize.widthPx - cols * photoWidthPx) / (2 * cols)) : 0;
+    const drawGapX = marginX * 2;
+
+    // Same rule vertically
+    const marginY = rows > 0 ? Math.floor((pageSize.heightPx - rows * photoHeightPx) / (2 * rows)) : 0;
+    const drawGapY = marginY * 2;
+
     // Center the grid on the page
-    const totalGridWidth = cols * photoWidthPx + (cols - 1) * GAP;
-    const totalGridHeight = rows * photoHeightPx + (rows - 1) * GAP;
+    const totalGridWidth = cols * photoWidthPx + (cols - 1) * drawGapX;
+    const totalGridHeight = rows * photoHeightPx + (rows - 1) * drawGapY;
     const offsetX = Math.floor((pageSize.widthPx - totalGridWidth) / 2);
     const offsetY = Math.floor((pageSize.heightPx - totalGridHeight) / 2);
 
@@ -84,8 +95,8 @@ export const generatePhotoSheet = async (imageSources, docType, pageSize = PAGE_
         for (let col = 0; col < cols; col++) {
             if (photoIdx >= loadedImages.length) break;
 
-            const x = offsetX + col * (photoWidthPx + GAP);
-            const y = offsetY + row * (photoHeightPx + GAP);
+            const x = offsetX + col * (photoWidthPx + drawGapX);
+            const y = offsetY + row * (photoHeightPx + drawGapY);
 
             const img = loadedImages[photoIdx];
             ctx.drawImage(img, x, y, photoWidthPx, photoHeightPx);

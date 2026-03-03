@@ -57,7 +57,27 @@ export default function Editor({ images, onCancel, onRemoveImage }) {
     const [contrast, setContrast] = useState(10);
     const [bgRemoval, setBgRemoval] = useState(true);
     const [aiEngine, setAiEngine] = useState('imgly'); // 'imgly' or 'removebg'
-    const [bgColor, setBgColor] = useState('#FFFFFF');
+
+    // Per-image background color
+    const [perBgColor, setPerBgColor] = useState(() => images.map(() => '#FFFFFF'));
+    const bgColor = perBgColor[currentIndex] || '#FFFFFF';
+    const setBgColor = (color) => setPerBgColor(prev => {
+        const next = [...prev];
+        next[currentIndex] = color;
+        return next;
+    });
+    const setBgColorForAll = (color) => setPerBgColor(prev => prev.map(() => color));
+
+    // Keep perBgColor in sync when images are added or removed
+    useEffect(() => {
+        setPerBgColor(prev => {
+            if (prev.length === images.length) return prev;
+            if (images.length > prev.length) {
+                return [...prev, ...new Array(images.length - prev.length).fill('#FFFFFF')];
+            }
+            return prev.slice(0, images.length);
+        });
+    }, [images.length]);
     const [selectedDoc, setSelectedDoc] = useState(documentTypes[0]);
     const [aspect, setAspect] = useState(documentTypes[0].ratio);
     const [customWidth, setCustomWidth] = useState(35);
@@ -605,8 +625,9 @@ export default function Editor({ images, onCancel, onRemoveImage }) {
 
                     const transparentUrl = URL.createObjectURL(removedBgBlob);
                     setProcessingStatus(`Applying adjustments (photo ${i + 1})...`);
-                    // Apply filters to the subject ONLY, keeping BG pure white
-                    finalSingle = await applyBgColor(transparentUrl, bgColor, brightness, contrast);
+                    // Apply filters to the subject ONLY, using this photo's background color
+                    const photoBgColor = perBgColor[i] || '#FFFFFF';
+                    finalSingle = await applyBgColor(transparentUrl, photoBgColor, brightness, contrast);
                 } else {
                     // No BG removal - apply filters to the whole cropped image
                     finalSingle = await applyFilters(croppedUrl, brightness, contrast);
@@ -912,7 +933,7 @@ export default function Editor({ images, onCancel, onRemoveImage }) {
                             </div>
 
                             {[
-                                { title: 'Plain Background', desc: bgRemoval ? `Background replaced with ${bgColor === '#FFFFFF' ? 'white' : 'custom color'}.` : 'Original background kept.' },
+                                { title: 'Plain Background', desc: bgRemoval ? `Background replaced with ${perBgColor.every(c => c === perBgColor[0]) ? (perBgColor[0] === '#FFFFFF' ? 'white' : 'custom color') : 'per-photo custom colors'}.` : 'Original background kept.' },
                                 { title: 'Head Positioning', desc: 'Centered and looking directly at camera.' },
                                 { title: 'Eye Visibility', desc: 'Eyes are open, clear, and visible.' },
                                 { title: 'No Shadows', desc: 'Lighting is balanced across the face.' },
@@ -1255,11 +1276,21 @@ export default function Editor({ images, onCancel, onRemoveImage }) {
                                 >
                                     <img src={img} alt={`Photo ${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                                     <span style={{
-                                        position: 'absolute', bottom: 1, left: 1, // moved from right:1 to left:1 for layout
+                                        position: 'absolute', bottom: 1, left: 1,
                                         background: i === currentIndex ? '#2563EB' : 'rgba(0,0,0,0.5)',
                                         color: '#fff', fontSize: 9, fontWeight: 800,
                                         padding: '0 4px', borderRadius: 3, lineHeight: '14px'
                                     }}>{i + 1}</span>
+                                    {/* Per-photo bg color indicator */}
+                                    {bgRemoval && (
+                                        <div style={{
+                                            position: 'absolute', bottom: 1, right: 1,
+                                            width: 10, height: 10, borderRadius: '50%',
+                                            background: perBgColor[i] || '#FFFFFF',
+                                            border: '1.5px solid rgba(0,0,0,0.3)',
+                                            boxShadow: '0 0 2px rgba(0,0,0,0.2)'
+                                        }} />
+                                    )}
 
                                     <div
                                         onClick={(e) => {
@@ -1658,6 +1689,60 @@ export default function Editor({ images, onCancel, onRemoveImage }) {
                                             {bgColor.toUpperCase()}
                                         </span>
                                     </div>
+
+                                    {/* Apply to all / per-photo indicator */}
+                                    {images.length > 1 && (
+                                        <div style={{
+                                            marginTop: 14, padding: 12, borderRadius: 10,
+                                            background: 'var(--bg-secondary)', border: '1px solid var(--border-light)'
+                                        }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                                                <span style={{ fontSize: 11, fontWeight: 700, color: 'var(--text-muted-dark)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                                                    Photo {currentIndex + 1} of {images.length}
+                                                </span>
+                                                <button
+                                                    onClick={() => setBgColorForAll(bgColor)}
+                                                    style={{
+                                                        background: '#2563EB', color: '#fff', border: 'none',
+                                                        padding: '4px 10px', borderRadius: 6, fontSize: 11, fontWeight: 600,
+                                                        cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4,
+                                                        transition: 'all 0.2s'
+                                                    }}
+                                                >
+                                                    Apply to All
+                                                </button>
+                                            </div>
+                                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                                                {images.map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        onClick={() => setCurrentIndex(i)}
+                                                        title={`Photo ${i + 1}: ${(perBgColor[i] || '#FFFFFF').toUpperCase()}`}
+                                                        style={{
+                                                            width: 28, height: 28, borderRadius: 8,
+                                                            background: perBgColor[i] || '#FFFFFF',
+                                                            cursor: 'pointer',
+                                                            border: i === currentIndex
+                                                                ? '2.5px solid #2563EB'
+                                                                : '1.5px solid #CBD5E1',
+                                                            boxShadow: i === currentIndex
+                                                                ? '0 0 0 2px rgba(37,99,235,0.25)'
+                                                                : 'inset 0 0 0 1px rgba(0,0,0,0.06)',
+                                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                            transition: 'all 0.2s', position: 'relative'
+                                                        }}
+                                                    >
+                                                        <span style={{
+                                                            fontSize: 9, fontWeight: 800,
+                                                            color: (perBgColor[i] || '#FFFFFF') === '#FFFFFF' || (perBgColor[i] || '#FFFFFF') === '#FEF9C3' || (perBgColor[i] || '#FFFFFF') === '#DBEAFE'
+                                                                ? '#475569' : '#fff',
+                                                            textShadow: 'none'
+                                                        }}>{i + 1}</span>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
